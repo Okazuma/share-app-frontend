@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     extends: [
         'eslint:recommended',               // 基本的なJavaScriptのルール ESLintの推奨ルールを適用
         'plugin:vue/vue3-essential',        // Vue 3用の基本ルール Vue 3の基本的なルールを適用

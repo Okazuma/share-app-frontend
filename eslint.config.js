@@ -9,4 +9,8 @@ export default [
   {languageOptions: { globals: {...globals.browser, ...globals.node} }},
   pluginJs.configs.recommended,
   ...pluginVue.configs["flat/essential"],
+  {
+    // .nuxt ディレクトリを無視
+    ignores: ["**/.nuxt/**/"],
+  },
 ];
