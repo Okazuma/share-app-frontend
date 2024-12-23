@@ -1,0 +1,14 @@
+/* デフォルトのフォントファミリーを設定 */
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+/* グローバルな背景色を設定 */
+body {
+    background-color: #f0f0f0;
+}
+
+/* 他のカスタムスタイル */
+h1 {
+    color: #333;
+}

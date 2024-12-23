@@ -1,0 +1,6 @@
+/* Tailwindの基本スタイルリセット */
+@tailwind base;
+/* Tailwindのコンポーネント用スタイル */
+@tailwind components;
+/* Tailwindのユーティリティクラス */
+@tailwind utilities;
