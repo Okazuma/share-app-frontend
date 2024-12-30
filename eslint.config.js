@@ -11,6 +11,8 @@ export default [
   ...pluginVue.configs["flat/essential"],
   {
     // .nuxt ディレクトリを無視
-    ignores: ["**/.nuxt/**/"],
+    ignores: ["**/.nuxt/**/",
+              '**/index.vue'
+    ],
   },
 ];
