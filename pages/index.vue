@@ -1,9 +1,7 @@
 <template>
-    <div>
-        <TheHeader />
-        <h1>Hello,Nuxt 3!</h1>
-        <NuxtLink to="/register-page">登録ページへ</NuxtLink>
-        <NuxtLink to="/login-page">loginページへ</NuxtLink>
+    <div class="flex flex-col md:flex-row">
+        <UserMenu class="w-80 bg-indigo-950 p-4"/>
+        <PostList class="flex-grow bg-indigo-950 p-4"/>
     </div>
 </template>
 
