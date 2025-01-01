@@ -26,6 +26,7 @@ const postContent = ref('');
 
 const submitPost = () => {
     if (postContent.value.trim()) {
+        if(confirm('この内容で投稿しますか？')){
         const newPost = {
             id: Date.now(),
             content: postContent.value,
@@ -33,6 +34,7 @@ const submitPost = () => {
             };
         postStore.addPost(newPost); // 投稿を追加
         postContent.value = ''; // 入力をクリア
+        }
     } else {
         alert('投稿内容を入力してください');
     }

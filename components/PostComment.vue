@@ -3,12 +3,7 @@
         <div class="bg-indigo-950 mx-auto p-4 h-auto md:auto">
             <h1 class="text-center text-white border-2 border-gray-300">コメント</h1>
             <div class="border-2 border-gray-300 p-2">
-                <button>
-                    <img src="/images/heart.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
-                </button>
-                <button>
-                    <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
-                </button>
+                
 
                 <!------- 投稿内容 ------->
                 <div v-if="post" class="p-4 bg-indigo-950 text-white">
@@ -29,7 +24,13 @@
         </form>
 
         <!------- コメント一覧 ------->
-        <div class="mx-auto p-4" v-for="comment in filteredComments" :key="comment.createdAt">
+        <div class="mx-auto px-4 py-2" v-for="comment in filteredComments" :key="comment.id">
+            <button>
+                    <img src="/images/heart.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
+                </button>
+                <button @click="deleteComment(comment.id)">
+                    <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
+                </button>
             <p class="p-2 text-white border-2 border-gray-300">{{ comment.content }}</p>
             <small class="block text-gray-400">投稿日時: {{ comment.createdAt }}</small>
         </div>
@@ -58,7 +59,7 @@ const newComment = ref(''); // 新しいコメントの入力内容を保持
 
 const post = computed(() => {
     console.log('props.postId:', props.postId);
-    console.log('postStore.posts:', postStore.posts); 
+    console.log('postStore.posts:', postStore.posts);
   return postStore.posts.find((p) => p.id === Number(props.postId)); // props.postId を数値に変換
 });
 
@@ -66,11 +67,21 @@ const post = computed(() => {
 // 新しいコメントを投稿する処理
 const submitComment = () => {
     if (newComment.value.trim()) {
-    commentStore.addComment(props.postId, newComment.value); // コメントをストアに追加
-    console.log('コメントが追加されました:', commentStore.comments);
-    newComment.value = ''; // 入力フィールドをクリア
+        if(confirm('この内容で投稿しますか？')){
+        commentStore.addComment(props.postId, newComment.value); // コメントをストアに追加
+        console.log('コメントが追加されました:', commentStore.comments);
+        newComment.value = ''; // 入力フィールドをクリア
+        }
     } else {
     alert('コメントを入力してください');
+    }
+};
+
+// コメントを削除する処理
+const deleteComment = (commentId) => {
+    if(confirm('削除しますか？')){
+    commentStore.deleteComment(commentId);
+    console.log(`コメントが削除されました: ${commentId}`);
     }
 };
 

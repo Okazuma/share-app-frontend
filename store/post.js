@@ -7,8 +7,14 @@ export const usePostStore = defineStore('posts', () => {
     const addPost = (newPost) => {
         posts.value.unshift(newPost);
     };
+
+    const deletePost = (postId) => {
+        posts.value = posts.value.filter(post => post.id !== postId)
+    }
+    
     return {
         posts,    // 状態
         addPost,  // アクション
+        deletePost,
     };
 });
