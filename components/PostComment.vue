@@ -3,7 +3,6 @@
         <div class="bg-indigo-950 mx-auto p-4 h-auto md:auto">
             <h1 class="text-center text-white border-2 border-gray-300">コメント</h1>
             <div class="border-2 border-gray-300 p-2">
-                
 
                 <!------- 投稿内容 ------->
                 <div v-if="post" class="p-4 bg-indigo-950 text-white">
@@ -24,56 +23,66 @@
         </form>
 
         <!------- コメント一覧 ------->
-        <div class="mx-auto px-4 py-2" v-for="comment in filteredComments" :key="comment.id">
-            <button>
-                    <img src="/images/heart.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
-                </button>
+        <div class="mx-auto px-4 py-2" v-for="comment in comments" :key="comment.id">
                 <button @click="deleteComment(comment.id)">
                     <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
                 </button>
-            <p class="p-2 text-white border-2 border-gray-300">{{ comment.content }}</p>
+            <p class="p-2 text-white border-2 border-gray-300">{{ comment.message }}</p>
             <small class="block text-gray-400">投稿日時: {{ comment.createdAt }}</small>
         </div>
-
     </section>
 </template>
 
 
 
 <script setup>
-import { ref, computed} from 'vue';
-import { usePostStore } from './store/post';
+import { ref} from 'vue';
+import { useUserStore } from '~/store/user';
 import { useCommentStore} from './store/comment';
+import { useRouter } from 'vue-router'; // リダイレクト用にrouterをインポート
 
 // 親コンポーネントからpostIdを受け取る
 const props = defineProps({
-    postId: {
-        type: [String, Number],
-        required: true,
+    comments: {
+    type: Array,
+    required: true
     },
+    postId: {
+        type: Number,
+        required: true
+    },
+    post: {
+        type: Object,
+        required: false, // 投稿が見つからない場合も想定
+        default: null
+    }
 });
 
-const postStore = usePostStore(); // 投稿ストアを取得
+// const postStore = usePostStore(); // 投稿ストアを取得
 const commentStore = useCommentStore(); // コメントストアを取得
 const newComment = ref(''); // 新しいコメントの入力内容を保持
-
-const post = computed(() => {
-    console.log('props.postId:', props.postId);
-    console.log('postStore.posts:', postStore.posts);
-  return postStore.posts.find((p) => p.id === Number(props.postId)); // props.postId を数値に変換
-});
+const userStore = useUserStore();
+const router = useRouter(); // routerを使用してリダイレクト
 
 
 // 新しいコメントを投稿する処理
-const submitComment = () => {
+const submitComment = async() => {
+    if(!userStore.user){
+        alert('ログインが必要です');
+        router.push('/login-page');
+        return;
+    }
     if (newComment.value.trim()) {
-        if(confirm('この内容で投稿しますか？')){
-        commentStore.addComment(props.postId, newComment.value); // コメントをストアに追加
-        console.log('コメントが追加されました:', commentStore.comments);
-        newComment.value = ''; // 入力フィールドをクリア
+        if (confirm('この内容でコメントしますか？')) {
+            try {
+                await commentStore.createComment(props.postId, { message: newComment.value });
+                newComment.value = ''; // 入力フィールドをクリア
+            } catch (error) {
+                alert('コメントの作成に失敗しました: ' + error.message);
+            }
         }
     } else {
-    alert('コメントを入力してください');
+        alert('コメントを入力してください');
     }
 };
 
@@ -81,16 +90,11 @@ const submitComment = () => {
 const deleteComment = (commentId) => {
     if(confirm('削除しますか？')){
     commentStore.deleteComment(commentId);
-    console.log(`コメントが削除されました: ${commentId}`);
+        // console.log(`コメントが削除されました: ${commentId}`);
     }
 };
 
-// 特定の投稿に対するコメントをフィルタリング
-const filteredComments = computed(() => {
-    return commentStore.comments.filter((c) => c.postId === post.value?.id);
-});
 </script>
-
 
 
 <style scoped>

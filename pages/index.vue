@@ -6,9 +6,18 @@
 </template>
 
 <script setup>
+import { usePostStore } from '~/store/post';
+import { useUserStore } from '~/store/user';
+import { onMounted } from 'vue';
 
+const userStore = useUserStore();
+const postStore = usePostStore();
+
+onMounted(() => {
+  userStore.initializeUser();
+  postStore.initializePost();
+});
 </script>
 
-<style>
-
+<style scoped>
 </style>

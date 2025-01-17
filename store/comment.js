@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 export const useCommentStore = defineStore('comment', () => {
     const comments = ref([]);
@@ -8,21 +10,109 @@ export const useCommentStore = defineStore('comment', () => {
     const addComment = (postId, newComment) => {
         comments.value.unshift({
             id: uuidv4(), // UUID を生成
-            postId: Number(postId),
+            postId: String(postId),
             content: newComment,
             createdAt: new Date().toISOString()
         });
     };
 
-    const deleteComment = (commentId) => {
-        comments.value = comments.value.filter(comment => comment.id !== commentId);
+    const createComment = async (postId, newComment) => {
+        if (!postId) {
+            throw new Error('投稿IDがありません');
+        }
+
+        try {
+            // Firebaseの認証情報を取得
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error('ユーザーが未ログインです');
+            }
+
+            const token = await user.getIdToken();
+            const userId = user.uid;
+
+            console.log('送信するデータ:', {
+                user_id: userId,
+                post_id: postId,
+                message: newComment.message,
+            });
+
+            const response = await axios.post(
+                'http://localhost/api/comments', {
+                    user_id: userId,
+                    post_id: postId,
+                    message: newComment.message,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log({ userId, postId, message: newComment.message });
+            console.log('コメントが作成されました:', response.data);
+
+            comments.value.push(response.data);
+
+            return response.data;
+        } catch (error) {
+            console.error('コメントの作成に失敗しました:', error);
+            throw error;
+        }
+    };
+
+
+
+    const deleteComment = async (commentId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error('ユーザーが未ログインです');
+            }
+
+            const token = await user.getIdToken();
+
+            // リクエスト内容をログに出力
+            console.log('送信するリクエスト:');
+            console.log({
+                url: `http://localhost/api/comments/${commentId}`,
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            await axios.delete(`http://localhost/api/comments/${commentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+
+            comments.value = comments.value.filter(comment => comment.id !== commentId);
+        } catch (error) {
+            console.error('コメントの削除に失敗しました:', error);
+            throw error;
+        }
+    };
+
+
+    // コメントを初期化するメソッド（データベースから取得）
+    const initializeComments = async (postId) => {
+        try {
+            const response = await axios.get(`http://localhost/api/comments/post/${postId}`);
+            console.log('取得したコメント:', response.data);
+            comments.value = response.data; // APIから取得したコメントデータを格納
+        } catch (error) {
+            console.error('コメントの取得に失敗しました:', error);
+        }
     };
 
     return {
         comments,
         addComment,
+        createComment,
         deleteComment,
+        initializeComments,
     };
-
 });
 

@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { defineNuxtPlugin } from '#app';
 import { initializeApp } from "firebase/app";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,17 +19,10 @@ export default defineNuxtPlugin(nuxtApp => {
         measurementId: "G-GB1Y6TDYTJ"
     };
 
-    // Initialize Firebase
+    // Firebase初期化
     const app = initializeApp(firebaseConfig);
-    // クライアントサイドのみで Analytics 初期化
-    if (typeof window !== 'undefined') {
-        const analytics = getAnalytics(app);
+    const auth = getAuth(app);
 
-        // イベントログを送信（例: 'page_view' イベント）
-        logEvent(analytics, 'page_view');
-
-        // Firebase インスタンスをアプリケーション全体で利用できるように提供
-        nuxtApp.provide('firebase', app);
-        nuxtApp.provide('analytics', analytics);
-    }
+    nuxtApp.provide('firebase', app);
+    nuxtApp.provide('auth', auth); // Auth を提供
 });
