@@ -39,7 +39,7 @@
 import { ref} from 'vue';
 import { useUserStore } from '~/store/user';
 import { useCommentStore} from './store/comment';
-import { useRouter } from 'vue-router'; // リダイレクト用にrouterをインポート
+import { navigateTo } from '#app';
 
 // 親コンポーネントからpostIdを受け取る
 const props = defineProps({
@@ -58,18 +58,19 @@ const props = defineProps({
     }
 });
 
-// const postStore = usePostStore(); // 投稿ストアを取得
+
 const commentStore = useCommentStore(); // コメントストアを取得
 const newComment = ref(''); // 新しいコメントの入力内容を保持
 const userStore = useUserStore();
-const router = useRouter(); // routerを使用してリダイレクト
+
+
 
 
 // 新しいコメントを投稿する処理
 const submitComment = async() => {
     if(!userStore.user){
         alert('ログインが必要です');
-        router.push('/login-page');
+        navigateTo('/login-page');
         return;
     }
     if (newComment.value.trim()) {
@@ -86,8 +87,21 @@ const submitComment = async() => {
     }
 };
 
+
+
+
+
 // コメントを削除する処理
-const deleteComment = (commentId) => {
+const deleteComment = async (commentId) => {
+    await userStore.initializeUser();
+
+    // ユーザーが存在しているか確認
+    if (!userStore.user) {
+        alert('ログインが必要です');
+        navigateTo('/login-page');
+        return;
+    }
+
     if(confirm('削除しますか？')){
     commentStore.deleteComment(commentId);
         // console.log(`コメントが削除されました: ${commentId}`);

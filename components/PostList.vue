@@ -2,7 +2,7 @@
     <section class="post-list bg-indigo-950">
 
 
-        <form @submit.prevent="submit" class="bg-indigo-950 mx-auto p-4 h-auto md:h-screen">
+        <form @submit.prevent="submit" class="mx-auto p-4 h-auto md:h-screen">
             <h1 class="text-center text-white border-2 border-gray-300">ホーム</h1>
             <div class="border-2 border-gray-300 p-2" v-for="post in postStore.posts" :key="post.id">
                 <!-- いいねボタン -->
@@ -33,21 +33,63 @@
 
 <script setup>
 import { usePostStore } from './store/post';
+import { useUserStore } from './store/user';
+import { useLikeStore } from '~/store/like';
+import { navigateTo } from '#app';
+
 
 const postStore = usePostStore();
+const userStore = useUserStore();
+const likeStore = useLikeStore();
 
-const deletePost = (postId) => {
+
+
+const deletePost = async (postId) => {
+    // ユーザーの初期化を確実に待機
+    await userStore.initializeUser();
+
+    // ユーザーが存在しているか確認
+    if (!userStore.user) {
+        alert('ログインが必要です');
+        navigateTo('/login-page');
+        return;
+    }
+
     if(confirm('この投稿を削除しますか？')){
     console.log('削除した投稿のID:', postId);
     postStore.deletePost(postId);
     }
 };
 
-const toggleLike = (postId) => {
-    postStore.toggleLike(postId);
+
+
+
+
+const toggleLike = async (postId) => {
+    const user = userStore.user;
+    if (!user) {
+        alert('ログインが必要です');
+        navigateTo('/login-page'); // ログインページにリダイレクト
+        return;
+    }
+
+    const post = postStore.posts.find((p) => p.id === postId);
+    if (!post) return;
+
+    try {
+        if (post.isLiked) {
+            await likeStore.removeLike(postId);
+            post.isLiked = false; // isLiked を false に更新
+            post.likes -= 1; // いいね数を減らす
+        } else {
+            await likeStore.addLike(postId);
+            post.isLiked = true; // isLiked を true に更新
+            post.likes += 1; // いいね数を増やす
+        }
+    } catch (error) {
+        console.error('いいねの処理中にエラーが発生:', error);
+    }
 };
-
-
 </script>
 
 <style scoped>

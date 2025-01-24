@@ -5,7 +5,7 @@
         <div class="my-4">
             <p v-if="user !== null">Hello, {{ user?.displayName }} "{{ user?.email }}"</p>
             <p v-else>You are not logged in.</p>
-            </div>
+        </div>
 
         <NuxtLink to="/" class="flex items-center space-x-4">
             <img src="/images/home.png" class="w-5 h-5">
@@ -29,47 +29,92 @@
 <script setup>
 import { ref } from "vue"
 import { usePostStore } from './store/post';
-import { useRouter } from "vue-router";
 import { useUserStore } from "/store/user";
+import { navigateTo } from '#app';
 import { useNuxtApp } from "#app";
+import { computed } from 'vue';
+
+
 
 
 const postStore = usePostStore();
 const postContent = ref('');
 const userStore = useUserStore();
-const router = useRouter();
-const { $auth } = useNuxtApp(); // Firebase Authインスタンスを取得
-const user = userStore.user;
-
+const { $auth } = useNuxtApp();
+const user = computed(() => userStore.user); // リアクティブに監視
 
 // 投稿の送信をpostStoreに送信するメソッド
-const submitPost = () => {
-    if(!userStore.user){
-        alert('ログインが必要です');
-        router.push('/login-page');
-        return;
-    }
-    if (postContent.value.trim()) {
-        if(confirm('この内容で投稿しますか？')){
-        const newPost = {
-            id: Number(Date.now()),
-            content: postContent.value,
-            createdAt: new Date().toISOString(),
-            };
-        postStore.createPost(newPost);
-        postContent.value = '';
+// const submitPost = async() => {
+//     if(!userStore.user){
+//         alert('ログインが必要です');
+//         router.push('/login-page');
+//         return;
+//     }
+//     // ユーザー情報が正しく設定されているか確認
+//     await userStore.initializeUser();  // 初期化処理を待機
+
+
+//     if (postContent.value.trim()) {
+//         if(confirm('この内容で投稿しますか？')){
+//         const newPost = {
+//             id: Number(Date.now()),
+//             content: postContent.value,
+//             createdAt: new Date().toISOString(),
+//             };
+//         postStore.createPost(newPost);
+//         postContent.value = '';
+//         }
+//     } else {
+//         alert('投稿内容を入力してください');
+//     }
+// };
+
+const submitPost = async () => {
+    try {
+        // ユーザーの初期化を確実に待機
+        await userStore.initializeUser();
+
+        // ユーザーが存在しているか確認
+        if (!userStore.user) {
+            alert('ログインが必要です');
+            navigateTo('/login-page');
+            return;
         }
-    } else {
-        alert('投稿内容を入力してください');
+
+        // 投稿内容の確認
+        if (postContent.value.trim()) {
+            if (confirm('この内容で投稿しますか？')) {
+                const newPost = {
+                    id: Number(Date.now()),
+                    content: postContent.value,
+                    createdAt: new Date().toISOString(),
+                };
+
+                // 投稿作成
+                await postStore.createPost(newPost);
+                postContent.value = ''; // 投稿後にテキストをクリア
+                alert('投稿が完了しました');
+            }
+        } else {
+            alert('投稿内容を入力してください');
+        }
+    } catch (error) {
+        console.error('投稿エラー:', error);
+        alert('投稿中にエラーが発生しました');
     }
 };
+
+
+
+
+
 
 // ログアウト処理
 const logout = async () => {
     try {
     await userStore.logout($auth); // $authを渡してログアウト
         alert("ログアウトしました");
-        router.push("/login-page"); // ログインページへリダイレクト
+        navigateTo("/login-page"); // ログインページへリダイレクト
     } catch (error) {
         console.error("Logout Error:", error);
         alert("ログアウトに失敗しました");

@@ -14,16 +14,14 @@
 <script setup>
 import { ref } from "vue";
 import { useUserStore } from "/store/user";
-import { useRouter } from "vue-router";
-import { useNuxtApp } from "#app"; // Firebaseの$authを取得
+import { navigateTo } from '#app';
+
 
 const name = ref("");
 const email = ref("");
 const password = ref("");
-
 const userStore = useUserStore();
-const router = useRouter();
-const { $auth } = useNuxtApp();
+
 
 const register = async () => {
     if (!email.value || !password.value || !name.value) {
@@ -33,9 +31,9 @@ const register = async () => {
 
     try {
         // Firebaseで新規登録
-        await userStore.register($auth, email.value, password.value);
+        await userStore.register( email.value, password.value);
         alert("登録成功！");
-        router.push("/login-page"); // 登録後にログインページに遷移
+        navigateTo("/login-page"); // 登録後にログインページに遷移
     } catch (error) {
         // エラーをユーザーに表示
         console.error("登録エラー:", error);
@@ -45,7 +43,7 @@ const register = async () => {
 
 </script>
 
-<style>
+<style scoped>
 
 
 </style>

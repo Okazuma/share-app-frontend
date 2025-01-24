@@ -1,8 +1,9 @@
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import { useUserStore } from '~/store/user';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
+
 
 export const useCommentStore = defineStore('comment', () => {
     const comments = ref([]);
@@ -16,18 +17,21 @@ export const useCommentStore = defineStore('comment', () => {
         });
     };
 
+
+
+
+
     const createComment = async (postId, newComment) => {
         if (!postId) {
             throw new Error('投稿IDがありません');
         }
 
         try {
-            // Firebaseの認証情報を取得
-            const auth = getAuth();
-            const user = auth.currentUser;
-
+            const userStore = useUserStore(); // userStoreを参照
+            const user = userStore.user; // userStoreからユーザー情報を取得
             if (!user) {
-                throw new Error('ユーザーが未ログインです');
+                console.error("ユーザーがログインしていません");
+                return;
             }
 
             const token = await user.getIdToken();
@@ -65,13 +69,15 @@ export const useCommentStore = defineStore('comment', () => {
 
 
 
+
+
     const deleteComment = async (commentId) => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
-
+            const userStore = useUserStore(); // userStoreを参照
+            const user = userStore.user; // userStoreからユーザー情報を取得
             if (!user) {
-                throw new Error('ユーザーが未ログインです');
+                console.error("ユーザーがログインしていません");
+                return;
             }
 
             const token = await user.getIdToken();
@@ -87,13 +93,15 @@ export const useCommentStore = defineStore('comment', () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-
             comments.value = comments.value.filter(comment => comment.id !== commentId);
         } catch (error) {
             console.error('コメントの削除に失敗しました:', error);
             throw error;
         }
     };
+
+
+
 
 
     // コメントを初期化するメソッド（データベースから取得）
@@ -106,6 +114,10 @@ export const useCommentStore = defineStore('comment', () => {
             console.error('コメントの取得に失敗しました:', error);
         }
     };
+
+
+
+
 
     return {
         comments,

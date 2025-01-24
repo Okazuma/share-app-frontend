@@ -9,16 +9,20 @@
 </template>
 
 <script setup>
-import { ref,computed, onMounted } from 'vue';
+import { ref,computed} from 'vue';
 import { useRoute } from 'vue-router';
 import { usePostStore } from '~/store/post';
 import { useCommentStore } from '~/store/comment';
+import { onBeforeMount } from 'vue';
+
 
 const post = ref(null);
 const route = useRoute();
 const postId = computed(() => route.params['postid']);
 const commentStore = useCommentStore();
 const postStore = usePostStore();
+
+
 
 
 
@@ -29,18 +33,28 @@ const filteredComments = computed(() => {
 });
 
 
-onMounted(async () => {
-    // ストア経由でデータを初期化
-    await commentStore.initializeComments(postId.value);
-    await postStore.initializePost(postId.value);
-    // ストアから該当の投稿を取得してローカルに代入
-    post.value = postStore.posts.find((p) => p.id === Number(postId.value));
-    if (!post.value) {
-        console.error('該当する投稿が見つかりません');
+
+
+
+// onBeforeMountでデータを初期化
+onBeforeMount(async () => {
+    try {
+        // ストア経由でデータを初期化
+        await commentStore.initializeComments(postId.value);
+        await postStore.initializePost(postId.value);  // 特定の投稿を初期化
+
+        // ストアから該当の投稿を取得してローカルに代入
+        post.value = postStore.posts.find((p) => p.id === Number(postId.value));
+        if (!post.value) {
+            console.error('該当する投稿が見つかりません');
+        }
+    } catch (error) {
+        console.error('投稿データの初期化に失敗しました:', error);
     }
 });
 </script>
 
-<style>
+<style scoped>
+
 
 </style>

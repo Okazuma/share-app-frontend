@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
 import { ref } from "vue";
+import { defineStore } from "pinia";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
@@ -10,17 +10,27 @@ export const useUserStore = defineStore("user", () => {
     const user = ref(null); // ユーザー情報
     const isAuthenticated = ref(false); // 認証状態
     const isInitialized = ref(false) // 認証状態の初期化が完了したかどうかを管理
-    const auth = getAuth();
 
-    // ユーザーをセット
-    const setUser = (userData) => {
-        user.value = userData;
-        isAuthenticated.value = true;
+
+
+
+
+    // ユーザー情報をセット
+    const setUser = (firebaseUser) => {
+        if (firebaseUser) {
+            user.value = firebaseUser;  // FirebaseのUserオブジェクトそのままをセット
+            isAuthenticated.value = true;
+        } else {
+            clearUser(); // 万が一 null が渡された場合はクリア
+        }
         isInitialized.value = true;
     };
 
 
-    // ユーザーをクリア
+
+
+
+    // ユーザー情報をクリア
     const clearUser = () => {
         user.value = null;
         isAuthenticated.value = false;
@@ -28,68 +38,106 @@ export const useUserStore = defineStore("user", () => {
     };
 
 
-    // 登録
-    const register = async ($auth, email, password) => {
+
+
+
+    const register = async (email, password) => {
         try {
-            const userCredential = await createUserWithEmailAndPassword($auth, email, password);
-            setUser(userCredential.user);
+            console.log('Register Request:', { email, password });
+            const auth = getAuth();
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            setUser(userCredential.user); // 認証情報をセット
         } catch (error) {
-            console.error("Registration Error:", error);
+            console.error('Registration Error:', error);
             throw error;
         }
     };
 
-    // ログイン
-    const login = async ($auth, email, password) => {
+
+
+
+
+    // ログイン処理
+    const login = async (email, password) => {
         try {
-            const userCredential = await signInWithEmailAndPassword($auth, email, password);
-            setUser(userCredential.user);
+            console.log('Login Request:', { email, password });
+            const auth = getAuth();
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            setUser(userCredential.user); // 認証情報をセット
         } catch (error) {
-            console.error("Login Error", error);
+            console.error('Login Error:', error);
             throw error;
         }
     };
 
-    // ログアウト
-    const logout = async ($auth) => {
+
+
+
+
+    // ログアウト処理
+    const logout = async () => {
         try {
-            await signOut($auth);
-            clearUser();
+            const auth = getAuth();
+            await signOut(auth);
+            clearUser(); // 認証情報をクリア
         } catch (error) {
-            console.error("Logout Error", error);
+            console.error('Logout Error:', error);
+            throw error;
         }
     };
 
 
 
-    // ユーザーの認証を確認する関数
-    const initializeUser = () => {
-        return new Promise((resolve) => {
-            onAuthStateChanged(auth, (firebaseUser) => {
-                if (firebaseUser) {
-                    console.log("認証されたユーザー:", firebaseUser);
-                    setUser(firebaseUser);
-                } else {
-                    console.log("認証されていないユーザー");
-                    clearUser();
+
+
+    const initializeUser = async () => {
+        console.log("ユーザー初期化前:", user.value); // ユーザーが初期化される前の状態
+        const auth = getAuth();
+        const firebaseUser = auth.currentUser;
+
+        if (firebaseUser) {
+            setUser(firebaseUser);
+        }
+
+        return new Promise((resolve, reject) => {
+            onAuthStateChanged(
+                auth,
+                (firebaseUser) => {
+                    if (firebaseUser) {
+                        setUser(firebaseUser);
+                        isAuthenticated.value = true;
+                    } else {
+                        clearUser();
+                        isAuthenticated.value = false;
+                    }
+                    isInitialized.value = true;
+                    resolve(firebaseUser); // 認証が完了したらresolveを呼び出す
+                    console.log("ユーザー初期化後:", user.value); // ユーザーが初期化される前の状態
+                },
+                (error) => {
+                    console.error("Auth state change error:", error);
+                    reject(error);
                 }
-                resolve(); // 初期化完了
-            });
+            );
         });
     };
 
 
 
 
+
+
+
+
     return {
         user,
-        // isAuthenticated,
+        isAuthenticated,
+        isInitialized,
         setUser,
         clearUser,
         register,
         login,
         logout,
         initializeUser,
-        // isInitialized
     };
 });
