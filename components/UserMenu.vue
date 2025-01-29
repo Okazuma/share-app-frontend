@@ -41,47 +41,22 @@ const postStore = usePostStore();
 const postContent = ref('');
 const userStore = useUserStore();
 const { $auth } = useNuxtApp();
-const user = computed(() => userStore.user); // リアクティブに監視
-
-// 投稿の送信をpostStoreに送信するメソッド
-// const submitPost = async() => {
-//     if(!userStore.user){
-//         alert('ログインが必要です');
-//         router.push('/login-page');
-//         return;
-//     }
-//     // ユーザー情報が正しく設定されているか確認
-//     await userStore.initializeUser();  // 初期化処理を待機
+const user = computed(() => userStore.user);
 
 
-//     if (postContent.value.trim()) {
-//         if(confirm('この内容で投稿しますか？')){
-//         const newPost = {
-//             id: Number(Date.now()),
-//             content: postContent.value,
-//             createdAt: new Date().toISOString(),
-//             };
-//         postStore.createPost(newPost);
-//         postContent.value = '';
-//         }
-//     } else {
-//         alert('投稿内容を入力してください');
-//     }
-// };
+
+
 
 const submitPost = async () => {
     try {
-        // ユーザーの初期化を確実に待機
         await userStore.initializeUser();
 
-        // ユーザーが存在しているか確認
         if (!userStore.user) {
             alert('ログインが必要です');
             navigateTo('/login-page');
             return;
         }
 
-        // 投稿内容の確認
         if (postContent.value.trim()) {
             if (confirm('この内容で投稿しますか？')) {
                 const newPost = {
@@ -90,9 +65,8 @@ const submitPost = async () => {
                     createdAt: new Date().toISOString(),
                 };
 
-                // 投稿作成
                 await postStore.createPost(newPost);
-                postContent.value = ''; // 投稿後にテキストをクリア
+                postContent.value = '';
                 alert('投稿が完了しました');
             }
         } else {
@@ -112,18 +86,17 @@ const submitPost = async () => {
 // ログアウト処理
 const logout = async () => {
     try {
-    await userStore.logout($auth); // $authを渡してログアウト
+    await userStore.logout($auth);
         alert("ログアウトしました");
-        navigateTo("/login-page"); // ログインページへリダイレクト
+        navigateTo("/login-page");
     } catch (error) {
         console.error("Logout Error:", error);
         alert("ログアウトに失敗しました");
     }
 };
-
-
 </script>
 
 <style scoped>
+
 
 </style>

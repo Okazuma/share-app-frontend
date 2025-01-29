@@ -10,7 +10,7 @@ export const useCommentStore = defineStore('comment', () => {
 
     const addComment = (postId, newComment) => {
         comments.value.unshift({
-            id: uuidv4(), // UUID を生成
+            id: uuidv4(),
             postId: String(postId),
             content: newComment,
             createdAt: new Date().toISOString()
@@ -27,8 +27,8 @@ export const useCommentStore = defineStore('comment', () => {
         }
 
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
+            const userStore = useUserStore();
+            const user = userStore.user;
             if (!user) {
                 console.error("ユーザーがログインしていません");
                 return;
@@ -73,21 +73,14 @@ export const useCommentStore = defineStore('comment', () => {
 
     const deleteComment = async (commentId) => {
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
+            const userStore = useUserStore();
+            const user = userStore.user;
             if (!user) {
                 console.error("ユーザーがログインしていません");
                 return;
             }
 
             const token = await user.getIdToken();
-
-            // リクエスト内容をログに出力
-            console.log('送信するリクエスト:');
-            console.log({
-                url: `http://localhost/api/comments/${commentId}`,
-                headers: { Authorization: `Bearer ${token}` },
-            });
 
             await axios.delete(`http://localhost/api/comments/${commentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -104,12 +97,10 @@ export const useCommentStore = defineStore('comment', () => {
 
 
 
-    // コメントを初期化するメソッド（データベースから取得）
     const initializeComments = async (postId) => {
         try {
             const response = await axios.get(`http://localhost/api/comments/post/${postId}`);
-            console.log('取得したコメント:', response.data);
-            comments.value = response.data; // APIから取得したコメントデータを格納
+            comments.value = response.data;
         } catch (error) {
             console.error('コメントの取得に失敗しました:', error);
         }

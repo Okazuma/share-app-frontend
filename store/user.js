@@ -9,7 +9,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 export const useUserStore = defineStore("user", () => {
     const user = ref(null); // ユーザー情報
     const isAuthenticated = ref(false); // 認証状態
-    const isInitialized = ref(false) // 認証状態の初期化が完了したかどうかを管理
+    const isInitialized = ref(false)
 
 
 
@@ -18,10 +18,10 @@ export const useUserStore = defineStore("user", () => {
     // ユーザー情報をセット
     const setUser = (firebaseUser) => {
         if (firebaseUser) {
-            user.value = firebaseUser;  // FirebaseのUserオブジェクトそのままをセット
+            user.value = firebaseUser;
             isAuthenticated.value = true;
         } else {
-            clearUser(); // 万が一 null が渡された場合はクリア
+            clearUser();
         }
         isInitialized.value = true;
     };
@@ -41,12 +41,13 @@ export const useUserStore = defineStore("user", () => {
 
 
 
+    // 登録処理
     const register = async (email, password) => {
         try {
             console.log('Register Request:', { email, password });
             const auth = getAuth();
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            setUser(userCredential.user); // 認証情報をセット
+            setUser(userCredential.user);
         } catch (error) {
             console.error('Registration Error:', error);
             throw error;
@@ -63,7 +64,7 @@ export const useUserStore = defineStore("user", () => {
             console.log('Login Request:', { email, password });
             const auth = getAuth();
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            setUser(userCredential.user); // 認証情報をセット
+            setUser(userCredential.user);
         } catch (error) {
             console.error('Login Error:', error);
             throw error;
@@ -79,7 +80,7 @@ export const useUserStore = defineStore("user", () => {
         try {
             const auth = getAuth();
             await signOut(auth);
-            clearUser(); // 認証情報をクリア
+            clearUser();
         } catch (error) {
             console.error('Logout Error:', error);
             throw error;
@@ -91,7 +92,6 @@ export const useUserStore = defineStore("user", () => {
 
 
     const initializeUser = async () => {
-        console.log("ユーザー初期化前:", user.value); // ユーザーが初期化される前の状態
         const auth = getAuth();
         const firebaseUser = auth.currentUser;
 
@@ -111,8 +111,7 @@ export const useUserStore = defineStore("user", () => {
                         isAuthenticated.value = false;
                     }
                     isInitialized.value = true;
-                    resolve(firebaseUser); // 認証が完了したらresolveを呼び出す
-                    console.log("ユーザー初期化後:", user.value); // ユーザーが初期化される前の状態
+                    resolve(firebaseUser);
                 },
                 (error) => {
                     console.error("Auth state change error:", error);
@@ -121,11 +120,6 @@ export const useUserStore = defineStore("user", () => {
             );
         });
     };
-
-
-
-
-
 
 
 

@@ -7,7 +7,7 @@
             <div class="border-2 border-gray-300 p-2" v-for="post in postStore.posts" :key="post.id">
                 <!-- いいねボタン -->
                 <button @click="toggleLike(post.id)" :style="{color: post.isLiked ? 'red' : 'white'}">
-                    <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="500" viewBox="0, 0, 500,500" class="w-6 h-6 inline-block ml-2" alt="詳細">
+                    <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="500" viewBox="0, 0, 500,500" class="w-6 h-6 inline-block ml-2" alt="ハートアイコン">
                     <g id="svgg">
                         <path id="path0" d="M112.500 34.735 C 45.768 46.482,4.999 109.643,19.192 179.291 C 31.718 240.755,101.233 329.478,231.250 449.942 C 249.239 466.609,251.745 466.122,278.916 440.678 C 401.446 325.939,468.656 238.923,480.808 179.291 C 507.568 47.980,348.160 -21.398,267.083 86.274 C 261.965 93.072,252.152 108.825,251.233 111.720 C 250.524 113.955,249.615 113.737,248.406 111.042 C 224.824 58.470,165.831 25.348,112.500 34.735" stroke="none" fill="currentColor" fill-rule="evenodd"></path>
                     </g>
@@ -17,7 +17,7 @@
                 <!-- いいねカウント -->
                 <span class="text-white ml-4">{{ post.likes }}</span>
 
-                <button @click="deletePost(post.id)">
+                <button v-if="post.user_id === currentUserId" @click="deletePost(post.id)">
                     <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
                 </button>
                 <NuxtLink :to="`/posts/${post.id}`">
@@ -32,6 +32,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { usePostStore } from './store/post';
 import { useUserStore } from './store/user';
 import { useLikeStore } from '~/store/like';
@@ -41,14 +42,13 @@ import { navigateTo } from '#app';
 const postStore = usePostStore();
 const userStore = useUserStore();
 const likeStore = useLikeStore();
+const currentUserId = computed(() => userStore.user?.uid);
 
 
 
 const deletePost = async (postId) => {
-    // ユーザーの初期化を確実に待機
     await userStore.initializeUser();
 
-    // ユーザーが存在しているか確認
     if (!userStore.user) {
         alert('ログインが必要です');
         navigateTo('/login-page');
@@ -69,7 +69,7 @@ const toggleLike = async (postId) => {
     const user = userStore.user;
     if (!user) {
         alert('ログインが必要です');
-        navigateTo('/login-page'); // ログインページにリダイレクト
+        navigateTo('/login-page');
         return;
     }
 
@@ -79,12 +79,12 @@ const toggleLike = async (postId) => {
     try {
         if (post.isLiked) {
             await likeStore.removeLike(postId);
-            post.isLiked = false; // isLiked を false に更新
-            post.likes -= 1; // いいね数を減らす
+            post.isLiked = false;
+            post.likes -= 1;
         } else {
             await likeStore.addLike(postId);
-            post.isLiked = true; // isLiked を true に更新
-            post.likes += 1; // いいね数を増やす
+            post.isLiked = true;
+            post.likes += 1;
         }
     } catch (error) {
         console.error('いいねの処理中にエラーが発生:', error);
@@ -93,5 +93,6 @@ const toggleLike = async (postId) => {
 </script>
 
 <style scoped>
+
 
 </style>

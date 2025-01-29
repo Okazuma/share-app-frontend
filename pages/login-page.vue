@@ -31,12 +31,10 @@ const login = async () => {
     }
 
     try {
-        // Firebase認証を利用してログイン
         await userStore.login(email.value, password.value);
         alert("ログイン成功！");
-        navigateTo("/"); // ログイン後にホームへ遷移
+        navigateTo("/");
     } catch (error) {
-        // エラーをユーザーフレンドリーに表示
         console.error("ログインエラー:", error);
         alert("ログイン失敗: " + (error.message || "不明なエラー"));
     }

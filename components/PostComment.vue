@@ -24,8 +24,8 @@
 
         <!------- コメント一覧 ------->
         <div class="mx-auto px-4 py-2" v-for="comment in comments" :key="comment.id">
-                <button @click="deleteComment(comment.id)">
-                    <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="詳細" />
+                <button v-if="comment.user_id === currentUserId" @click="deleteComment(comment.id)">
+                    <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="削除アイコン" />
                 </button>
             <p class="p-2 text-white border-2 border-gray-300">{{ comment.message }}</p>
             <small class="block text-gray-400">投稿日時: {{ comment.createdAt }}</small>
@@ -36,12 +36,18 @@
 
 
 <script setup>
-import { ref} from 'vue';
+import { ref,computed } from 'vue';
 import { useUserStore } from '~/store/user';
 import { useCommentStore} from './store/comment';
 import { navigateTo } from '#app';
 
-// 親コンポーネントからpostIdを受け取る
+
+const commentStore = useCommentStore();
+const newComment = ref('');
+const userStore = useUserStore();
+const currentUserId = computed(() => userStore.user?.uid);
+
+
 const props = defineProps({
     comments: {
     type: Array,
@@ -53,15 +59,13 @@ const props = defineProps({
     },
     post: {
         type: Object,
-        required: false, // 投稿が見つからない場合も想定
+        required: false,
         default: null
     }
 });
 
 
-const commentStore = useCommentStore(); // コメントストアを取得
-const newComment = ref(''); // 新しいコメントの入力内容を保持
-const userStore = useUserStore();
+
 
 
 
@@ -77,7 +81,7 @@ const submitComment = async() => {
         if (confirm('この内容でコメントしますか？')) {
             try {
                 await commentStore.createComment(props.postId, { message: newComment.value });
-                newComment.value = ''; // 入力フィールドをクリア
+                newComment.value = '';
             } catch (error) {
                 alert('コメントの作成に失敗しました: ' + error.message);
             }
@@ -95,7 +99,6 @@ const submitComment = async() => {
 const deleteComment = async (commentId) => {
     await userStore.initializeUser();
 
-    // ユーザーが存在しているか確認
     if (!userStore.user) {
         alert('ログインが必要です');
         navigateTo('/login-page');
@@ -103,8 +106,7 @@ const deleteComment = async (commentId) => {
     }
 
     if(confirm('削除しますか？')){
-    commentStore.deleteComment(commentId);
-        // console.log(`コメントが削除されました: ${commentId}`);
+        commentStore.deleteComment(commentId);
     }
 };
 

@@ -16,26 +16,21 @@ export const useLikeStore = defineStore('likes', () => {
 
     const initializeLikes = async () => {
         try {
-            const userStore =useUserStore(); // userStoreを参照
-            const user = userStore.user; // 現在のユーザーを取得
+            const userStore =useUserStore();
+            const user = userStore.user;
 
             if (!user) {
                 console.log("認証されていないユーザー: いいねデータは取得されません");
-                likes.value = []; // ログインしていない場合、空の配列を設定
+                likes.value = [];
                 return;
             }
 
             const token = await user.getIdToken();
 
-            // サーバーからいいねデータを取得
             const { data } = await axios.get('http://localhost/api/likes', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
-            console.log('サーバーからのいいねデータ:', data);
-
             likes.value = data;
-            console.log('初期化されたいいね一覧:', likes.value);
         } catch (error) {
             console.error('いいね一覧の取得に失敗しました:', error);
         }
@@ -47,11 +42,10 @@ export const useLikeStore = defineStore('likes', () => {
 
     const addLike = async (postId) => {
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
+            const userStore = useUserStore();
+            const user = userStore.user;
 
-            const token = await user.getIdToken(); // Firebaseトークンを取得
-
+            const token = await user.getIdToken();
             const response = await axios.post('http://localhost/api/likes', {
                 post_id: postId,
                 user_id: user.uid
@@ -64,7 +58,7 @@ export const useLikeStore = defineStore('likes', () => {
             // 投稿がない場合何もしない
             if (!post) return;
 
-            // すでにいいねされている場合は何もしない
+            // いいねをしてる場合
             if (post.isLiked) {
                 return;
             }
@@ -86,15 +80,15 @@ export const useLikeStore = defineStore('likes', () => {
 
     const removeLike = async (postId) => {
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
-            const token = await user.getIdToken(); // Firebaseトークンを取得
+            const userStore = useUserStore();
+            const user = userStore.user;
+            const token = await user.getIdToken();
 
             const response = await axios.delete(`http://localhost/api/likes/${postId}`,
                 {
                     data: {
                         post_id: postId,
-                        user_id: user.uid // Firebase UID
+                        user_id: user.uid,
                     },
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -105,7 +99,7 @@ export const useLikeStore = defineStore('likes', () => {
             // 投稿がない場合何もしない
             if (!post) return;
 
-            // まだいいねがされていない場合は何もしない
+            // いいねをしていない場合
             if (!post.isLiked) {
                 return;
             }
@@ -119,8 +113,6 @@ export const useLikeStore = defineStore('likes', () => {
             console.error('いいねの削除中にエラーが起こりました:', error);
         }
     };
-
-
 
 
 

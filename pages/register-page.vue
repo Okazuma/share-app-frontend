@@ -30,12 +30,10 @@ const register = async () => {
     }
 
     try {
-        // Firebaseで新規登録
         await userStore.register( email.value, password.value);
         alert("登録成功！");
-        navigateTo("/login-page"); // 登録後にログインページに遷移
+        navigateTo("/login-page");
     } catch (error) {
-        // エラーをユーザーに表示
         console.error("登録エラー:", error);
         alert("登録失敗: " + (error.message || "不明なエラー"));
     }

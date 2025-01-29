@@ -10,87 +10,37 @@ import axios from 'axios';
 export const usePostStore = defineStore('posts', () => {
     const posts = ref([]);
 
-
-
-
-
-    // const initializePost = async () => {
-    //     try {
-    //         const userStore = useUserStore(); // userStoreを参照
-    //         const likeStore = useLikeStore();
-
-    //         // ユーザーが認証されているか確認
-    //         if (userStore.isAuthenticated && userStore.user) {
-    //             const user = userStore.user;
-    //             const token = await user.getIdToken(); // トークンを取得
-
-    //             // サーバーから投稿データを取得
-    //             const { data } = await axios.get('http://localhost/api/posts', {
-    //                 headers: token ? { Authorization: `Bearer ${token}` } : {},
-    //             });
-
-    //             console.log('サーバーからの投稿データ:', data);
-
-    //             // 投稿データにいいね情報を付加
-    //             posts.value = data.map((post) => {
-    //                 const isLiked = likeStore.likes.some((like) => like.post_id === post.id);
-    //                 return {
-    //                     ...post,
-    //                     likes: post.likes_count,
-    //                     isLiked,
-    //                 };
-    //             });
-
-    //             console.log('初期化された投稿一覧:', posts.value);
-    //         } else {
-    //             console.error('認証されていません。投稿データの取得を中止します。');
-    //         }
-    //     } catch (error) {
-    //         console.error('投稿データの取得に失敗しました:', error);
-    //     }
-    // };
-
-
     const initializePost = async () => {
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const likeStore = useLikeStore(); // likeStoreを参照
-
-            // サーバーから投稿データを取得
+            const userStore = useUserStore();
+            const likeStore = useLikeStore();
             const { data } = await axios.get('http://localhost/api/posts', {
                 headers: userStore.isAuthenticated && userStore.user ? {
                     Authorization: `Bearer ${await userStore.user.getIdToken()}`
                 } : {},
             });
 
-            console.log('サーバーからの投稿データ:', data);
-
             // 投稿データにいいね情報を付加
             posts.value = data.map((post) => {
                 if (userStore.isAuthenticated && userStore.user) {
-                    // ユーザーが認証されている場合は、いいね情報を設定
                     const isLiked = likeStore.likes.some((like) => like.post_id === post.id);
                     return {
                         ...post,
                         likes: post.likes_count,
-                        isLiked, // 認証されている場合のみisLikedを設定
+                        isLiked,
                     };
                 } else {
-                    // 認証されていない場合はisLikedは設定せず、likes_countのみ
                     return {
                         ...post,
                         likes: post.likes_count,
-                        isLiked: false, // 認証されていない場合、いいね情報を反映しない
+                        isLiked: false, 
                     };
                 }
             });
-
-            console.log('初期化された投稿一覧:', posts.value);
         } catch (error) {
             console.error('投稿データの取得に失敗しました:', error);
         }
     };
-
 
 
 
@@ -109,8 +59,8 @@ export const usePostStore = defineStore('posts', () => {
 
     const createPost = async (newPost) => {
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
+            const userStore = useUserStore();
+            const user = userStore.user;
             if (!user) {
                 console.error("ユーザーがログインしていません");
                 return;
@@ -133,10 +83,9 @@ export const usePostStore = defineStore('posts', () => {
                 }
             );
             const savedPost = response.data;
-            // 新規投稿に初期値を設定
             posts.value.unshift({
                 ...savedPost,
-                isLiked: false, // 初期状態ではユーザーはいいねしていない
+                isLiked: false,
             });
             console.log("投稿が作成されました:", savedPost);
             console.log("投稿内容:", newPost.content);
@@ -155,8 +104,8 @@ export const usePostStore = defineStore('posts', () => {
         posts.value = posts.value.filter(post => post.id !== postId);
 
         try {
-            const userStore = useUserStore(); // userStoreを参照
-            const user = userStore.user; // userStoreからユーザー情報を取得
+            const userStore = useUserStore();
+            const user = userStore.user;
             const token = await user ?.getIdToken();
 
             if (!token) {
@@ -172,12 +121,9 @@ export const usePostStore = defineStore('posts', () => {
             console.log('投稿が削除されました:', postId);
         } catch (error) {
             console.error('投稿の削除に失敗しました:', error);
-            // 削除が失敗した場合はローカルデータを元に戻す
             posts.value = originalPosts;
         }
     };
-
-
 
 
 
