@@ -9,6 +9,7 @@ import axios from 'axios';
 
 export const usePostStore = defineStore('posts', () => {
     const posts = ref([]);
+    const post = ref(null);
 
     const initializePost = async () => {
         try {
@@ -33,12 +34,43 @@ export const usePostStore = defineStore('posts', () => {
                     return {
                         ...post,
                         likes: post.likes_count,
-                        isLiked: false, 
+                        isLiked: false,
                     };
                 }
             });
         } catch (error) {
             console.error('投稿データの取得に失敗しました:', error);
+        }
+    };
+
+
+
+
+
+    const fetchPost = async (postId) => {
+        try {
+            const userStore = useUserStore();
+            const likeStore = useLikeStore();
+
+            const { data } = await axios.get(`http://localhost/api/posts/${postId}`, {
+                headers: userStore.isAuthenticated && userStore.user
+                    ? { Authorization: `Bearer ${await userStore.user.getIdToken()}` }
+                    : {},
+            });
+
+            const isLiked = userStore.isAuthenticated && userStore.user
+                ? likeStore.likes.some((like) => like.post_id === data.id)
+                : false;
+
+            post.value = {
+                ...data,
+                likes: data.likes_count,
+                isLiked,
+                comments: data.comments || []
+            };
+
+        } catch (error) {
+            console.error('投稿データの取得に失敗しました', error);
         }
     };
 
@@ -128,10 +160,12 @@ export const usePostStore = defineStore('posts', () => {
 
 
     return {
-        createPost,
-        initializePost,
         posts,
+        post,
+        initializePost,
+        fetchPost,
         // addPost,
+        createPost,
         deletePost,
     };
 });

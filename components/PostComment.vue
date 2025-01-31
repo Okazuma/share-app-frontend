@@ -51,7 +51,7 @@ const currentUserId = computed(() => userStore.user?.uid);
 const props = defineProps({
     comments: {
     type: Array,
-    required: true
+    required: false
     },
     postId: {
         type: Number,
