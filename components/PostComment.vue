@@ -23,7 +23,7 @@
         </form>
 
         <!------- コメント一覧 ------->
-        <div class="mx-auto px-4 py-2" v-for="comment in comments" :key="comment.id">
+        <div class="mx-auto px-4 py-2" v-for="comment in commentStore.comments" :key="comment.id">
                 <button v-if="comment.user_id === currentUserId" @click="deleteComment(comment.id)">
                     <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="削除アイコン" />
                 </button>
@@ -38,35 +38,18 @@
 <script setup>
 import { ref,computed } from 'vue';
 import { useUserStore } from '~/store/user';
+import { usePostStore } from '~/store/post';
 import { useCommentStore} from './store/comment';
 import { navigateTo } from '#app';
+
 
 
 const commentStore = useCommentStore();
 const newComment = ref('');
 const userStore = useUserStore();
 const currentUserId = computed(() => userStore.user?.uid);
-
-
-const props = defineProps({
-    comments: {
-    type: Array,
-    required: false
-    },
-    postId: {
-        type: Number,
-        required: true
-    },
-    post: {
-        type: Object,
-        required: false,
-        default: null
-    }
-});
-
-
-
-
+const postStore = usePostStore();
+const post = computed(() => postStore.post);
 
 
 
@@ -80,7 +63,7 @@ const submitComment = async() => {
     if (newComment.value.trim()) {
         if (confirm('この内容でコメントしますか？')) {
             try {
-                await commentStore.createComment(props.postId, { message: newComment.value });
+                await commentStore.createComment({ message: newComment.value });
                 newComment.value = '';
             } catch (error) {
                 alert('コメントの作成に失敗しました: ' + error.message);
@@ -90,8 +73,6 @@ const submitComment = async() => {
         alert('コメントを入力してください');
     }
 };
-
-
 
 
 
@@ -109,7 +90,6 @@ const deleteComment = async (commentId) => {
         commentStore.deleteComment(commentId);
     }
 };
-
 </script>
 
 
