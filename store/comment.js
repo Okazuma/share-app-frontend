@@ -1,21 +1,25 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '~/store/user';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 
 export const useCommentStore = defineStore('comment', () => {
     const comments = ref([]);
 
-    const addComment = (postId, newComment) => {
-        comments.value.unshift({
-            id: uuidv4(),
-            postId: String(postId),
-            content: newComment,
-            createdAt: new Date().toISOString()
-        });
-    };
+
+
+
+
+    // const addComment = (postId, newComment) => {
+    //     comments.value.unshift({
+    //         id: uuidv4(),
+    //         postId: String(postId),
+    //         content: newComment,
+    //         createdAt: new Date().toISOString()
+    //     });
+    // };
 
 
 
@@ -40,14 +44,14 @@ export const useCommentStore = defineStore('comment', () => {
             console.log('送信するデータ:', {
                 user_id: userId,
                 post_id: postId,
-                message: newComment.message,
+                message: newComment,
             });
 
             const response = await axios.post(
                 'http://localhost/api/comments', {
                     user_id: userId,
                     post_id: postId,
-                    message: newComment.message,
+                    message: newComment,
                 },
                 {
                     headers: {
@@ -58,7 +62,7 @@ export const useCommentStore = defineStore('comment', () => {
             console.log({ userId, postId, message: newComment.message });
             console.log('コメントが作成されました:', response.data);
 
-            comments.value.push(response.data);
+            comments.value.unshift(response.data);
 
             return response.data;
         } catch (error) {
@@ -72,6 +76,10 @@ export const useCommentStore = defineStore('comment', () => {
 
 
     const deleteComment = async (commentId) => {
+        // UIに即時反映: ローカルデータを先に更新
+        const originalComments = [...comments.value]; // 現在のコメントを保存
+        comments.value = comments.value.filter(comment => comment.id !== commentId);
+
         try {
             const userStore = useUserStore();
             const user = userStore.user;
@@ -89,7 +97,7 @@ export const useCommentStore = defineStore('comment', () => {
             comments.value = comments.value.filter(comment => comment.id !== commentId);
         } catch (error) {
             console.error('コメントの削除に失敗しました:', error);
-            throw error;
+            comments.value = originalComments; // エラー時に元に戻す
         }
     };
 
@@ -108,11 +116,9 @@ export const useCommentStore = defineStore('comment', () => {
 
 
 
-
-
     return {
         comments,
-        addComment,
+        // addComment,
         createComment,
         deleteComment,
         initializeComments,

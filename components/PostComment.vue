@@ -8,7 +8,7 @@
                 <div v-if="post" class="p-4 bg-indigo-950 text-white">
                     <span class="text-sm font-bold">-----投稿内容-----</span>
                     <p class="mt-2">{{ post.content }}</p>
-                    <small class="block mt-2 text-gray-400">投稿日時: {{ post.createdAt }}</small>
+                    <small class="block mt-2 text-gray-400">投稿日時: {{ formatDate(post.created_at) }}</small>
                 </div>
                 <div v-else>
                     <p class="text-red-500">投稿が見つかりません。</p>
@@ -28,7 +28,7 @@
                     <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="削除アイコン" />
                 </button>
             <p class="p-2 text-white border-2 border-gray-300">{{ comment.message }}</p>
-            <small class="block text-gray-400">投稿日時: {{ comment.createdAt }}</small>
+            <small class="block text-gray-400">投稿日時: {{ formatDate(comment.created_at) }}</small>
         </div>
     </section>
 </template>
@@ -41,6 +41,7 @@ import { useUserStore } from '~/store/user';
 import { usePostStore } from '~/store/post';
 import { useCommentStore} from './store/comment';
 import { navigateTo } from '#app';
+import { formatDate } from '~/utils/date';
 
 
 
@@ -50,6 +51,8 @@ const userStore = useUserStore();
 const currentUserId = computed(() => userStore.user?.uid);
 const postStore = usePostStore();
 const post = computed(() => postStore.post);
+
+
 
 
 
@@ -63,7 +66,7 @@ const submitComment = async() => {
     if (newComment.value.trim()) {
         if (confirm('この内容でコメントしますか？')) {
             try {
-                await commentStore.createComment({ message: newComment.value });
+                await commentStore.createComment( post.value.id,newComment.value );
                 newComment.value = '';
             } catch (error) {
                 alert('コメントの作成に失敗しました: ' + error.message);
@@ -73,6 +76,8 @@ const submitComment = async() => {
         alert('コメントを入力してください');
     }
 };
+
+
 
 
 
