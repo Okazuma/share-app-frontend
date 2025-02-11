@@ -3,7 +3,7 @@
         <NuxtLink to="/"><img src="/images/logo.png" class="h-6"></NuxtLink>
 
         <div class="my-4">
-            <p v-if="user !== null">Hello, {{ user?.displayName }} "{{ user?.email }}"</p>
+            <p v-if="user !== null"> {{ user?.displayName }} さん こんにちは！</p>
             <p v-else>You are not logged in.</p>
         </div>
 
@@ -18,10 +18,10 @@
             <span>ログアウト</span>
         </button>
 
-        <span class="block">シェア</span>
+        <span class="block text-center md:text-left">- - シェア - -</span>
         <form @submit.prevent="submitPost">
-            <textarea v-model="postContent" class="block mx-auto rounded w-72 h-32 text-white bg-indigo-950 border-2 border-gray-300 p-2"></textarea>
-            <button type="submit" class="border-2 border-gray-700 rounded-2xl w-30 bg-purple-800 px-4 py-2 text-sm">シェアする</button>
+            <textarea v-model="postContent" class="block mx-auto rounded w-72 h-32 text-white bg-gray-900 border-2 border-gray-300 my-2 p-2 outline-none"></textarea>
+            <button type="submit" class="block border-2 border-gray-700 rounded-2xl w-30 bg-purple-800 px-4 py-2 text-sm mx-auto md:mx-0">シェアする</button>
         </form>
     </div>
 </template>
@@ -63,7 +63,7 @@ const submitPost = async () => {
                     id: Number(Date.now()),
                     content: postContent.value,
                     createdAt: new Date().toISOString(),
-                };
+            };
 
                 await postStore.createPost(newPost);
                 postContent.value = '';

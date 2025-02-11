@@ -2,7 +2,7 @@
     <section class="post-list bg-indigo-950 text-white">
         <div class="bg-indigo-950 mx-auto p-4 h-auto md:auto">
             <h1 class="text-center text-white border-2 border-gray-300">コメント</h1>
-            <div class="border-2 border-gray-300 p-2">
+            <div class="border-b-2 border-gray-30">
 
                 <!------- 投稿内容 ------->
                 <div v-if="post" class="p-4 bg-indigo-950 text-white">
@@ -18,17 +18,20 @@
 
         <!------- コメント入力フォーム ------->
         <form @submit.prevent="submitComment" class="p-4 relative mb-8">
-            <input v-model="newComment" type="text" name="message" class="block border-2 border-gray-300 p-2 rounded text-white bg-indigo-950 w-full">
+            <input v-model="newComment" type="text" name="message" class="block border-2 border-gray-300 p-2 rounded text-white bg-gray-900 w-full outline-none">
             <button type="submit" class="absolute top-16 right-4 border-2 border-gray-700 rounded-2xl w-30 bg-purple-800 px-4 py-2 text-sm">コメント</button>
         </form>
 
         <!------- コメント一覧 ------->
-        <div class="mx-auto px-4 py-2" v-for="comment in commentStore.comments" :key="comment.id">
+        <div class="mx-auto px-4 py-4" v-for="comment in commentStore.comments" :key="comment.id">
+
+            <p class="pl-4 text-white border-b-2 border-gray-300">{{ comment.message }}</p>
+            <div class="flex items-center pl-4">
                 <button v-if="comment.user_id === currentUserId" @click="deleteComment(comment.id)">
-                    <img src="/images/cross.png" class="w-6 h-6 inline-block ml-2" alt="削除アイコン" />
+                    <img src="/images/cross.png" class="w-4 h-4 block ml-auto" alt="削除アイコン" />
                 </button>
-            <p class="p-2 text-white border-2 border-gray-300">{{ comment.message }}</p>
-            <small class="block text-gray-400">投稿日時: {{ formatDate(comment.created_at) }}</small>
+                <small class="ml-2 text-sm text-gray-400 my-auto">投稿日時: {{ formatDate(comment.created_at) }}</small>
+            </div>
         </div>
     </section>
 </template>

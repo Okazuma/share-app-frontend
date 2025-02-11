@@ -9,22 +9,33 @@
 import { usePostStore } from '~/store/post';
 import { useUserStore } from '~/store/user';
 import { useLikeStore } from '~/store/like';
+import { useCommentStore } from '~/store/comment';
+
 
 
 const userStore = useUserStore();
 const postStore = usePostStore();
 const likeStore = useLikeStore();
+const commentStore = useCommentStore();
+
+
+
 
 
 onBeforeMount(async () => {
   try {
     // ユーザー情報の初期化
     await userStore.initializeUser();
+    console.log("現在のユーザー情報:", userStore.user);
 
-    // 認証されたユーザーのみ、いいね情報を初期化
+    // 認証されたユーザーのみ、いいねを初期化
     if (userStore.isAuthenticated && userStore.user) {
       await likeStore.initializeLikes();
     }
+
+    // コメントデータの初期化
+    await commentStore.initializeComments();
+    console.log(commentStore.comments);
 
     // 投稿データの初期化
     await postStore.initializePost();
@@ -33,32 +44,6 @@ onBeforeMount(async () => {
     console.error('初期化中にエラーが発生しました:', error);
   }
 });
-
-// onBeforeMount(async () => {
-//   try {
-//     // ユーザー情報の初期化
-//     await userStore.initializeUser();
-
-//     // 投稿データの初期化
-//     await postStore.initializePost();
-
-//     // 投稿データが取得できたか確認
-//     if (postStore.posts && postStore.posts.length > 0) {
-//       // 認証されたユーザーのみ、いいね情報を初期化
-//       if (userStore.isAuthenticated && userStore.user) {
-//         await likeStore.initializeLikes();
-//       }
-//     } else {
-//       console.error("投稿データが読み込まれていません。");
-//     }
-
-//     console.log(postStore.posts);
-//   } catch (error) {
-//     console.error('初期化中にエラーが発生しました:', error);
-//   }
-// });
-
-
 </script>
 
 <style scoped>

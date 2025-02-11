@@ -33,9 +33,9 @@ onBeforeMount(async () => {
       await likeStore.initializeLikes();
     }
 
-    await postStore.fetchPost(postId.value);
-    post.value = postStore.post;
-    await commentStore.initializeComments(postId.value);
+    post.value = await postStore.fetchPost(postId.value);
+
+    await commentStore.fetchComments(postId.value);
   } catch (error) {
     console.error('投稿データの初期化に失敗しました:', error);
   } finally {

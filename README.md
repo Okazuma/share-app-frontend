@@ -74,3 +74,12 @@ bun run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 # share-app-frontend
+
+
+
+
+
+ 1 掲示板のような使い方で特定のメンバーで情報やコメントの共有をできるように
+    (グループでのイベントや取り組みに対する目的や方針などを掲示しておくような使い方)
+
+    pinia

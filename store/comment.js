@@ -77,7 +77,7 @@ export const useCommentStore = defineStore('comment', () => {
 
     const deleteComment = async (commentId) => {
         // UIに即時反映: ローカルデータを先に更新
-        const originalComments = [...comments.value]; // 現在のコメントを保存
+        const originalComments = [...comments.value];
         comments.value = comments.value.filter(comment => comment.id !== commentId);
 
         try {
@@ -97,7 +97,7 @@ export const useCommentStore = defineStore('comment', () => {
             comments.value = comments.value.filter(comment => comment.id !== commentId);
         } catch (error) {
             console.error('コメントの削除に失敗しました:', error);
-            comments.value = originalComments; // エラー時に元に戻す
+            comments.value = originalComments;
         }
     };
 
@@ -105,12 +105,25 @@ export const useCommentStore = defineStore('comment', () => {
 
 
 
-    const initializeComments = async (postId) => {
+    const initializeComments = async () => {
+        try {
+            const response = await axios.get("http://localhost/api/comments");
+            comments.value = response.data;
+        } catch (error) {
+            console.error('コメントの取得に失敗しました:', error);
+        }
+    };
+
+
+
+
+
+    const fetchComments = async (postId) => {
         try {
             const response = await axios.get(`http://localhost/api/comments/post/${postId}`);
             comments.value = response.data;
         } catch (error) {
-            console.error('コメントの取得に失敗しました:', error);
+            console.error("コメントの取得に失敗しました:", error);
         }
     };
 
@@ -122,6 +135,7 @@ export const useCommentStore = defineStore('comment', () => {
         createComment,
         deleteComment,
         initializeComments,
+        fetchComments
     };
 });
 

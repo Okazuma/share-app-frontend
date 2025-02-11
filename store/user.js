@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, updateProfile } from 'firebase/auth';
 
 
 
@@ -42,12 +42,20 @@ export const useUserStore = defineStore("user", () => {
 
 
     // 登録処理
-    const register = async (email, password) => {
+    const register = async (email, password, displayName) => {
         try {
-            console.log('Register Request:', { email, password });
+            console.log('Register Request:', { email, password,displayName });
             const auth = getAuth();
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            setUser(userCredential.user);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password,);
+            const user = userCredential.user;
+
+            // 🔹 Firebase の `updateProfile` を使用して displayName を設定
+            await updateProfile(user, { displayName });
+
+            setUser({ ...user, displayName });
+
+            console.log("登録成功:", user);
+
         } catch (error) {
             console.error('Registration Error:', error);
             throw error;
