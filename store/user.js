@@ -4,18 +4,13 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { getAuth, onAuthStateChanged, updateProfile } from 'firebase/auth';
 
 
-
-
 export const useUserStore = defineStore("user", () => {
-    const user = ref(null); // ユーザー情報
-    const isAuthenticated = ref(false); // 認証状態
+    const user = ref(null);
+    const isAuthenticated = ref(false);
     const isInitialized = ref(false)
 
 
 
-
-
-    // ユーザー情報をセット
     const setUser = (firebaseUser) => {
         if (firebaseUser) {
             user.value = firebaseUser;
@@ -30,7 +25,6 @@ export const useUserStore = defineStore("user", () => {
 
 
 
-    // ユーザー情報をクリア
     const clearUser = () => {
         user.value = null;
         isAuthenticated.value = false;
@@ -41,7 +35,6 @@ export const useUserStore = defineStore("user", () => {
 
 
 
-    // 登録処理
     const register = async (email, password, displayName) => {
         try {
             console.log('Register Request:', { email, password,displayName });
@@ -49,11 +42,9 @@ export const useUserStore = defineStore("user", () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password,);
             const user = userCredential.user;
 
-            // 🔹 Firebase の `updateProfile` を使用して displayName を設定
             await updateProfile(user, { displayName });
 
             setUser({ ...user, displayName });
-
             console.log("登録成功:", user);
 
         } catch (error) {
@@ -66,7 +57,6 @@ export const useUserStore = defineStore("user", () => {
 
 
 
-    // ログイン処理
     const login = async (email, password) => {
         try {
             console.log('Login Request:', { email, password });
@@ -83,7 +73,6 @@ export const useUserStore = defineStore("user", () => {
 
 
 
-    // ログアウト処理
     const logout = async () => {
         try {
             const auth = getAuth();

@@ -5,11 +5,15 @@ import { useLikeStore } from '~/store/like';
 import axios from 'axios';
 
 
-
-
 export const usePostStore = defineStore('posts', () => {
     const posts = ref([]);
     const post = ref(null);
+    const isOpen = ref(false);
+    const editingPostId = ref(null);
+    const editingContent = ref("");
+    const isProcessing = ref(false);
+
+
 
     const initializePost = async () => {
         try {
@@ -78,12 +82,82 @@ export const usePostStore = defineStore('posts', () => {
 
 
 
-    // 投稿を追加
-    // const addPost = (newPost) => {
-    //     newPost.isLiked = false;
-    //     newPost.likes = 0;
-    //     posts.value.unshift(newPost);
-    // };
+    const openModal = (postId, content) => {
+        console.log("Received Post ID:", postId);
+        console.log("Received Content:", content);
+        editingPostId.value = postId;
+        editingContent.value = content;
+        isOpen.value = true;
+        console.log("Updated editingPostId:", editingPostId.value);
+        console.log("Updated editingContent:", editingContent.value);
+    };
+
+
+
+
+
+    const closeModal = () => {
+        editingPostId.value = null;
+        editingContent.value = "";
+        isOpen.value = false;
+    };
+
+
+
+
+
+    const updateContent = async () => {
+        if (!editingPostId.value) return;
+
+        if (!editingContent.value.trim()) {
+            alert("投稿内容を入力してください。");
+            return;
+        }
+
+        // 編集確認
+        const isConfirmed = confirm("この内容で投稿を更新しますか？");
+        if (!isConfirmed) return;
+
+        // 連打防止
+        if (isProcessing.value) return;
+        isProcessing.value = true;
+
+        try {
+            const userStore = useUserStore();
+            console.log("Editing Post ID:", editingPostId.value);
+            console.log("All Posts:", posts.value);
+
+            const post = posts.value.find(p => p.id === editingPostId.value);
+            if (!post) {
+                console.log("Post not found!");
+                return;
+            }
+            console.log("Updated Post Content:", post.content);
+
+            const response = await fetch(`http://localhost/api/posts/${editingPostId.value}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${await userStore.user.getIdToken() }`
+                },
+                body: JSON.stringify({ content: editingContent.value })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                console.error("Failed to update post:", data.error);
+                return;
+            }
+
+            post.content = editingContent.value;
+            console.log("Post successfully updated:", data);
+            closeModal();
+        } catch (error) {
+            console.error("Error updating post:", error);
+        } finally {
+            isProcessing.value = false;
+        }
+    };
 
 
 
@@ -164,6 +238,14 @@ export const usePostStore = defineStore('posts', () => {
         post,
         initializePost,
         fetchPost,
+
+        isOpen,
+        editingPostId,
+        editingContent,
+        openModal,
+        closeModal,
+        updateContent,
+
         // addPost,
         createPost,
         deletePost,

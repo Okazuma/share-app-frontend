@@ -11,8 +11,6 @@ export const useLikeStore = defineStore('likes', () => {
 
 
 
-
-
     const initializeLikes = async () => {
         try {
             isProcessing.value = {};
@@ -37,8 +35,6 @@ export const useLikeStore = defineStore('likes', () => {
             likes.value = data;
             console.log("isProcessing (初期化後):", isProcessing.value);
 
-
-            // 取得したいいね情報に基づき、isProcessingを適切に設定
             data.forEach((like) => {
                 if (like.post_id === undefined) {
                     console.error("post_id が存在しません", like);
@@ -57,7 +53,6 @@ export const useLikeStore = defineStore('likes', () => {
 
 
 
-    // いいね追加
     const addLike = async (postId) => {
         if (isProcessing.value[postId]) return;
         isProcessing.value[postId] = true;
@@ -80,7 +75,6 @@ export const useLikeStore = defineStore('likes', () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // フロントエンドの状態を更新
             post.isLiked = true;
             post.likes += 1;
             likes.value.push({ post_id: postId, user_id: user.uid });
@@ -97,7 +91,6 @@ export const useLikeStore = defineStore('likes', () => {
 
 
 
-    // いいね削除
     const removeLike = async (postId) => {
         if (isProcessing.value[postId]) return;
         isProcessing.value[postId] = true;
@@ -118,7 +111,6 @@ export const useLikeStore = defineStore('likes', () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // フロントエンドの状態を更新
             post.isLiked = false;
             post.likes -= 1;
             likes.value = likes.value.filter(like => like.post_id !== postId);

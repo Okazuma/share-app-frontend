@@ -1,27 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '~/store/user';
-// import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 
 export const useCommentStore = defineStore('comment', () => {
     const comments = ref([]);
-
-
-
-
-
-    // const addComment = (postId, newComment) => {
-    //     comments.value.unshift({
-    //         id: uuidv4(),
-    //         postId: String(postId),
-    //         content: newComment,
-    //         createdAt: new Date().toISOString()
-    //     });
-    // };
-
-
 
 
 
