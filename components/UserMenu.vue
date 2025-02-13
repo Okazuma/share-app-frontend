@@ -67,7 +67,6 @@ const submitPost = async () => {
 
                 await postStore.createPost(newPost);
                 postContent.value = '';
-                alert('投稿が完了しました');
             }
         } else {
             alert('投稿内容を入力してください');

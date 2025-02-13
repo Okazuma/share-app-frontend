@@ -7,6 +7,7 @@
                 <!------- 投稿内容 ------->
                 <div v-if="post" class="p-4 bg-indigo-950 text-white">
                     <span class="text-sm font-bold">-----投稿内容-----</span>
+                    <span class="block text-white mb-4">[{{ post.user_name }}]</span>
                     <p class="mt-2">{{ post.content }}</p>
                     <small class="block mt-2 text-gray-400">投稿日時: {{ formatDate(post.created_at) }}</small>
                 </div>
@@ -24,9 +25,9 @@
 
         <!------- コメント一覧 ------->
         <div class="mx-auto px-4 py-4" v-for="comment in commentStore.comments" :key="comment.id">
-
+            <span class="block text-white ml-4 mb-2">[{{ comment.user_name }}]</span>
             <p class="pl-4 text-white border-b-2 border-gray-300">{{ comment.message }}</p>
-            <div class="flex items-center pl-4">
+            <div class="flex items-center ml-4">
                 <button v-if="comment.user_id === currentUserId" @click="deleteComment(comment.id)">
                     <img src="/images/cross.png" class="w-4 h-4 block ml-auto" alt="削除アイコン" />
                 </button>

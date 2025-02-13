@@ -10,7 +10,6 @@ import { ref,computed,onBeforeMount} from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '~/store/user';
 import { usePostStore } from '~/store/post';
-import { useLikeStore } from '~/store/like';
 import { useCommentStore } from '~/store/comment';
 
 
@@ -19,7 +18,6 @@ const route = useRoute();
 const postId = computed(() => Number(route.params['post_id']));
 const userStore = useUserStore();
 const postStore = usePostStore();
-const likeStore = useLikeStore();
 const commentStore = useCommentStore();
 const loading = ref(true);
 
@@ -27,21 +25,26 @@ const loading = ref(true);
 
 onBeforeMount(async () => {
   try {
+    console.time("🔥 ユーザー情報取得");
     await userStore.initializeUser();
+    console.timeEnd("🔥 ユーザー情報取得");
 
-    if (userStore.isAuthenticated && userStore.user) {
-      await likeStore.initializeLikes();
-    }
-
+    console.time("🔥 投稿情報取得");
     post.value = await postStore.fetchPost(postId.value);
+    console.timeEnd("🔥 投稿情報取得");
 
+    console.time("🔥 コメント情報取得");
     await commentStore.fetchComments(postId.value);
+    console.timeEnd("🔥 コメント情報取得");
   } catch (error) {
     console.error('投稿データの初期化に失敗しました:', error);
   } finally {
     loading.value = false;
   }
 });
+
+
+
 </script>
 
 <style scoped>

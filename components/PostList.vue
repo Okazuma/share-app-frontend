@@ -18,20 +18,20 @@
                     <NuxtLink :to="`/posts/${post.id}`" class="w-6 h-6  inline-block align-middle">
                         <img src="/images/detail.png" class="w-full h-full object-contain" alt="詳細" />
                     </NuxtLink>
-                    <span class="text-white ">
+                    <span class="text-white">
                         {{ commentStore.comments.filter(comment => comment.post_id === post.id).length }}
                     </span>
+                    <!----- 編集 ----->
+                        <button v-if="post.user_id === currentUserId" @click="postStore.openModal(post.id,post.content)" class="w-6 h-6 ml-6 flex items-center justify-center">
+                            <i class="fa-solid fa-pen-to-square text-white text-xl"></i>
+                        </button>
                     <!----- 削除 ----->
-                        <button v-if="post.user_id === currentUserId" @click="deletePost(post.id)" class="w-6 h-6 ml-4 flex items-center justify-center">
+                        <button v-if="post.user_id === currentUserId" @click="deletePost(post.id)" class="w-6 h-6 ml-2 flex items-center justify-center">
                             <img src="/images/cross.png" class="w-full h-full object-contain" alt="詳細" />
                         </button>
 
-                    <!----- 編集 ----->
-                        <button v-if="post.user_id === currentUserId" @click="postStore.openModal(post.id,post.content)" class="w-6 h-6  flex items-center justify-center">
-                            <i class="fa-solid fa-pen-to-square text-white text-xl"></i>
-                        </button>
                 </div>
-
+            <span class="block text-white mb-2" >[{{ post.user_name }}]</span>
             <span class="block text-white"><p>{{ post.content }}</p></span>
             <small class="text-white">{{ formatDate(post.created_at) }}</small>
             </div>

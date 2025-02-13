@@ -13,10 +13,10 @@ export const useLikeStore = defineStore('likes', () => {
 
     const initializeLikes = async () => {
         try {
+            const userStore = useUserStore();
             isProcessing.value = {};
-            console.log(isProcessing.value);
+            console.log("初期化: ", isProcessing.value);
 
-            const userStore =useUserStore();
             const user = userStore.user;
 
             if (!user) {
@@ -25,29 +25,35 @@ export const useLikeStore = defineStore('likes', () => {
                 return;
             }
 
-            const token = await user.getIdToken();
+            let token;
+            try {
+                token = await user.getIdToken();
+            } catch (error) {
+                console.error("IDトークンの取得に失敗:", error);
+                return;
+            }
 
             const { data } = await axios.get('http://localhost/api/likes', {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            console.log(data);
+            console.log("取得データ:", data);
             likes.value = data;
-            console.log("isProcessing (初期化後):", isProcessing.value);
 
             data.forEach((like) => {
                 if (like.post_id === undefined) {
                     console.error("post_id が存在しません", like);
                 }
-
                 isProcessing.value[like.post_id] = false;
             });
 
+            console.log("isProcessing (初期化後):", isProcessing.value);
 
         } catch (error) {
             console.error('いいね一覧の取得に失敗しました:', error);
         }
     };
+
 
 
 

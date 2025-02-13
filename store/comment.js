@@ -6,6 +6,7 @@ import axios from 'axios';
 
 export const useCommentStore = defineStore('comment', () => {
     const comments = ref([]);
+    const isProcessing = ref(false);
 
 
 
@@ -13,6 +14,9 @@ export const useCommentStore = defineStore('comment', () => {
         if (!postId) {
             throw new Error('投稿IDがありません');
         }
+
+        if (isProcessing.value) return;
+        isProcessing.value = true;
 
         try {
             const userStore = useUserStore();
@@ -24,11 +28,13 @@ export const useCommentStore = defineStore('comment', () => {
 
             const token = await user.getIdToken();
             const userId = user.uid;
+            const userName = user.displayName || "Unknown";
 
             console.log('送信するデータ:', {
                 user_id: userId,
                 post_id: postId,
                 message: newComment,
+                user_name: userName,
             });
 
             const response = await axios.post(
@@ -36,6 +42,7 @@ export const useCommentStore = defineStore('comment', () => {
                     user_id: userId,
                     post_id: postId,
                     message: newComment,
+                    user_name: userName,
                 },
                 {
                     headers: {
@@ -46,12 +53,17 @@ export const useCommentStore = defineStore('comment', () => {
             console.log({ userId, postId, message: newComment.message });
             console.log('コメントが作成されました:', response.data);
 
-            comments.value.unshift(response.data);
+            comments.value.unshift({
+                ...response.data,
+                user_name: userName,
+            });
 
             return response.data;
         } catch (error) {
             console.error('コメントの作成に失敗しました:', error);
             throw error;
+        } finally {
+            isProcessing.value = false;
         }
     };
 
@@ -105,7 +117,11 @@ export const useCommentStore = defineStore('comment', () => {
     const fetchComments = async (postId) => {
         try {
             const response = await axios.get(`http://localhost/api/comments/post/${postId}`);
-            comments.value = response.data;
+            comments.value = response.data.map(comment => ({
+                ...comment,
+                userName: comment.user_name, // ここを追加！
+            }));
+
         } catch (error) {
             console.error("コメントの取得に失敗しました:", error);
         }
@@ -115,7 +131,6 @@ export const useCommentStore = defineStore('comment', () => {
 
     return {
         comments,
-        // addComment,
         createComment,
         deleteComment,
         initializeComments,

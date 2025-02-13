@@ -39,6 +39,7 @@ export const usePostStore = defineStore('posts', () => {
                         ...post,
                         likes: post.likes_count,
                         isLiked: false,
+                        userName: post.user_name,
                     };
                 }
             });
@@ -70,6 +71,7 @@ export const usePostStore = defineStore('posts', () => {
                 ...data,
                 likes: data.likes_count,
                 isLiked,
+                userName: data.user_name,
                 comments: data.comments || []
             };
 
@@ -77,6 +79,7 @@ export const usePostStore = defineStore('posts', () => {
             console.error('投稿データの取得に失敗しました', error);
         }
     };
+
 
 
 
@@ -114,13 +117,13 @@ export const usePostStore = defineStore('posts', () => {
             return;
         }
 
-        // 編集確認
-        const isConfirmed = confirm("この内容で投稿を更新しますか？");
-        if (!isConfirmed) return;
-
         // 連打防止
         if (isProcessing.value) return;
         isProcessing.value = true;
+
+        // 編集確認
+        const isConfirmed = confirm("この内容で投稿を更新しますか？");
+        if (!isConfirmed) return;
 
         try {
             const userStore = useUserStore();
@@ -164,6 +167,10 @@ export const usePostStore = defineStore('posts', () => {
 
 
     const createPost = async (newPost) => {
+
+        if (isProcessing.value) return;
+        isProcessing.value = true;
+
         try {
             const userStore = useUserStore();
             const user = userStore.user;
@@ -181,6 +188,7 @@ export const usePostStore = defineStore('posts', () => {
                 "http://localhost/api/posts",
                 {
                     content: newPost.content,
+                    user_name: user.displayName || "Unknown",
                 },
                 {
                     headers: {
@@ -192,11 +200,14 @@ export const usePostStore = defineStore('posts', () => {
             posts.value.unshift({
                 ...savedPost,
                 isLiked: false,
+                user_name: savedPost.user_name,
             });
             console.log("投稿が作成されました:", savedPost);
             console.log("投稿内容:", newPost.content);
         } catch (error) {
             console.log("投稿の作成に失敗しました:", error);
+        } finally {
+            isProcessing.value = false;
         }
     };
 
@@ -238,15 +249,12 @@ export const usePostStore = defineStore('posts', () => {
         post,
         initializePost,
         fetchPost,
-
         isOpen,
         editingPostId,
         editingContent,
         openModal,
         closeModal,
         updateContent,
-
-        // addPost,
         createPost,
         deletePost,
     };
