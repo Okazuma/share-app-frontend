@@ -31,7 +31,7 @@
                         </button>
 
                 </div>
-            <span class="block text-white mb-2" >[{{ post.user_name }}]</span>
+            <span class="block text-white mb-2" >[{{ post.userName }}]</span>
             <span class="block text-white"><p>{{ post.content }}</p></span>
             <small class="text-white">{{ formatDate(post.created_at) }}</small>
             </div>

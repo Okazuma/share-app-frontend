@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { useUserStore } from '~/store/user';
 import { useLikeStore } from '~/store/like';
 import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 
 export const usePostStore = defineStore('posts', () => {
@@ -17,31 +18,24 @@ export const usePostStore = defineStore('posts', () => {
 
     const initializePost = async () => {
         try {
-            const userStore = useUserStore();
+            const auth = getAuth();
+            const currentUser = auth.currentUser;
+
             const likeStore = useLikeStore();
             const { data } = await axios.get('http://localhost/api/posts', {
-                headers: userStore.isAuthenticated && userStore.user ? {
-                    Authorization: `Bearer ${await userStore.user.getIdToken()}`
-                } : {},
+                headers: currentUser ? { Authorization: `Bearer ${await currentUser.getIdToken()}` } : {},
             });
 
             // 投稿データにいいね情報を付加
             posts.value = data.map((post) => {
-                if (userStore.isAuthenticated && userStore.user) {
-                    const isLiked = likeStore.likes.some((like) => like.post_id === post.id);
-                    return {
-                        ...post,
-                        likes: post.likes_count,
-                        isLiked,
-                    };
-                } else {
-                    return {
-                        ...post,
-                        likes: post.likes_count,
-                        isLiked: false,
-                        userName: post.user_name,
-                    };
-                }
+                const isLiked = currentUser ? likeStore.likes.some((like) => like.post_id === post.id) : false;
+
+                return {
+                    ...post,
+                    likes: post.likes_count,
+                    isLiked,
+                    userName: post.user_name,
+                };
             });
         } catch (error) {
             console.error('投稿データの取得に失敗しました:', error);
@@ -74,7 +68,6 @@ export const usePostStore = defineStore('posts', () => {
                 userName: data.user_name,
                 comments: data.comments || []
             };
-
         } catch (error) {
             console.error('投稿データの取得に失敗しました', error);
         }

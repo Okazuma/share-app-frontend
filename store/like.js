@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { useUserStore } from '~/store/user';
 import { usePostStore } from '~/store/post';
 import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 
 export const useLikeStore = defineStore('likes', () => {
@@ -13,27 +14,25 @@ export const useLikeStore = defineStore('likes', () => {
 
     const initializeLikes = async () => {
         try {
-            const userStore = useUserStore();
+            const auth = getAuth();
+            const currentUser = auth.currentUser;
+
             isProcessing.value = {};
-            console.log("初期化: ", isProcessing.value);
 
-            const user = userStore.user;
-
-            if (!user) {
+            if (!currentUser) {
                 console.log("認証されていないユーザー: いいねデータは取得されません");
-                likes.value = [];
                 return;
             }
 
             let token;
             try {
-                token = await user.getIdToken();
+                token = await currentUser.getIdToken();
             } catch (error) {
                 console.error("IDトークンの取得に失敗:", error);
                 return;
             }
 
-            const { data } = await axios.get('http://localhost/api/likes', {
+            const { data } = await axios.get("http://localhost/api/likes", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -41,16 +40,15 @@ export const useLikeStore = defineStore('likes', () => {
             likes.value = data;
 
             data.forEach((like) => {
-                if (like.post_id === undefined) {
+                if (!like.post_id) {
                     console.error("post_id が存在しません", like);
                 }
                 isProcessing.value[like.post_id] = false;
             });
 
             console.log("isProcessing (初期化後):", isProcessing.value);
-
         } catch (error) {
-            console.error('いいね一覧の取得に失敗しました:', error);
+            console.error("いいね一覧の取得に失敗しました:", error);
         }
     };
 
