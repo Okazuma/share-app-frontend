@@ -24,27 +24,26 @@ const loading = ref(true);
 
 
 onBeforeMount(async () => {
+  console.time("⭕️ 全体のデータ取得");
   try {
-    console.time("🔥 ユーザー情報取得");
+    console.time("⭕️ ユーザー情報取得");
     await userStore.initializeUser();
     console.timeEnd("🔥 ユーザー情報取得");
 
-    console.time("🔥 投稿情報取得");
+    console.time("⭕️ 投稿情報取得");
     post.value = await postStore.fetchPost(postId.value);
-    console.timeEnd("🔥 投稿情報取得");
+    console.timeEnd("⭕️ 投稿情報取得");
 
-    console.time("🔥 コメント情報取得");
+    console.time("⭕️ コメント情報取得");
     await commentStore.fetchComments(postId.value);
-    console.timeEnd("🔥 コメント情報取得");
+    console.timeEnd("⭕️ コメント情報取得");
+    console.timeEnd("⭕️ 全体のデータ取得");
   } catch (error) {
     console.error('投稿データの初期化に失敗しました:', error);
   } finally {
     loading.value = false;
   }
 });
-
-
-
 </script>
 
 <style scoped>

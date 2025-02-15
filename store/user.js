@@ -90,36 +90,44 @@ export const useUserStore = defineStore("user", () => {
 
 
     const initializeUser = async () => {
-        console.log("🔥 ユーザー情報の初期化開始");
+        console.log("ユーザー情報の初期化開始");
 
+        const auth = getAuth();
         const cachedUser = await getUserFromDB();
 
         if (cachedUser) {
-            console.log("✅ IndexedDB からユーザー情報を取得:", cachedUser);
-            user.value = cachedUser;
+            console.log("IndexedDB からユーザー情報を取得:", cachedUser);
+
+            user.value = {
+                ...cachedUser,
+                getIdToken: async () => {
+                    const currentUser = auth.currentUser;
+                    return currentUser ? currentUser.getIdToken() : null;
+                },
+            };
+
             isAuthenticated.value = true;
             isInitialized.value = true;
             return;
         }
 
-        console.log("🕒 Firebase からユーザー情報を取得中...");
-        const auth = getAuth();
+        console.log("Firebase からユーザー情報を取得中...");
 
         return new Promise((resolve, reject) => {
             onAuthStateChanged(
                 auth,
                 async (firebaseUser) => {
                     if (firebaseUser) {
-                        user.value = {
+                        user.value = firebaseUser;
+                        isAuthenticated.value = true;
+                        console.log("Firebase からユーザー情報を取得:", user.value);
+
+                        await saveUserToDB({
                             uid: firebaseUser.uid,
                             displayName: firebaseUser.displayName,
                             email: firebaseUser.email,
                             photoURL: firebaseUser.photoURL,
-                        };
-                        isAuthenticated.value = true;
-                        console.log("✅ Firebase からユーザー情報を取得:", user.value);
-
-                        await saveUserToDB({ ...user.value, uid: "currentUser" });
+                        });
                     } else {
                         console.log("⚠️ ログインしていません");
                         user.value = null;
@@ -129,7 +137,7 @@ export const useUserStore = defineStore("user", () => {
                     resolve(user.value);
                 },
                 (error) => {
-                    console.error("❌ Firebase 認証エラー:", error);
+                    console.error("Firebase 認証エラー:", error);
                     reject(error);
                 }
             );

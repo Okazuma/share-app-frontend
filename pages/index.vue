@@ -21,36 +21,39 @@ const commentStore = useCommentStore();
 
 
 
-
-
 onBeforeMount(async () => {
   try {
-    // ユーザー情報の初期化
-    console.time("🔥 ユーザー情報取得");
+    console.time("⭕️ 全体のデータ取得");
+
+    console.time("⏳ ユーザー情報取得");
     await userStore.initializeUser();
-    console.timeEnd("🔥 ユーザー情報取得");
+    console.timeEnd("⭕️ ユーザー情報取得");
     console.log("現在のユーザー情報:", userStore.user);
 
-    // 認証されたユーザーのみ、いいねを初期化
+    let likeInit = Promise.resolve();
+    let commentInit = Promise.resolve();
+
     if (userStore.isAuthenticated && userStore.user) {
-      console.time("🔥 いいねデータ取得");
-      await likeStore.initializeLikes();
-      console.timeEnd("🔥 いいねデータ取得");
+      console.time("⭕️ いいね & コメントデータ取得");
+      [likeInit, commentInit] = await Promise.all([
+        likeStore.initializeLikes(),
+        commentStore.initializeComments(),
+      ]);
+      console.timeEnd("⭕️ いいね & コメントデータ取得");
     }
 
-    // コメントデータの初期化
-    console.time("🔥 コメントデータ取得");
-    await commentStore.initializeComments();
-    console.timeEnd("🔥 コメントデータ取得");
-    console.log(commentStore.comments);
+    // 投稿データの取得
+    console.time("⭕️ 投稿データ取得");
+    const postInit = postStore.initializePost();
+    await postInit; // 投稿データ取得を待機
+    console.timeEnd("⭕️ 投稿データ取得");
 
-    // 投稿データの初期化
-    console.time("🔥 投稿データ取得");
-    await postStore.initializePost();
-    console.timeEnd("🔥 投稿データ取得");
-    console.log(postStore.posts);
+    console.timeEnd("⭕️ 全体のデータ取得");
+
+    console.log("現在のいいねデータ:", likeStore.likes);
+    console.log("現在の投稿データ:", postStore.posts);
   } catch (error) {
-    console.error('初期化中にエラーが発生しました:', error);
+    console.error("初期化中にエラーが発生しました:", error);
   }
 });
 </script>

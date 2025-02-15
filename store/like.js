@@ -4,6 +4,7 @@ import { useUserStore } from '~/store/user';
 import { usePostStore } from '~/store/post';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 
 export const useLikeStore = defineStore('likes', () => {
@@ -14,41 +15,54 @@ export const useLikeStore = defineStore('likes', () => {
 
     const initializeLikes = async () => {
         try {
+            console.log("いいねデータの初期化開始");
+
             const auth = getAuth();
-            const currentUser = auth.currentUser;
 
-            isProcessing.value = {};
+            return new Promise((resolve, reject) => {
+                onAuthStateChanged(auth, async (currentUser) => {
+                    if (!currentUser) {
+                        console.log("認証されていないユーザー: いいねデータは取得されません");
+                        likes.value = [];
+                        resolve([]);
+                        return;
+                    }
 
-            if (!currentUser) {
-                console.log("認証されていないユーザー: いいねデータは取得されません");
-                return;
-            }
+                    let token;
+                    try {
+                        token = await currentUser.getIdToken();
+                    } catch (error) {
+                        console.error("IDトークンの取得に失敗:", error);
+                        reject(error);
+                        return;
+                    }
 
-            let token;
-            try {
-                token = await currentUser.getIdToken();
-            } catch (error) {
-                console.error("IDトークンの取得に失敗:", error);
-                return;
-            }
+                    try {
+                        const { data } = await axios.get("http://localhost/api/likes", {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
 
-            const { data } = await axios.get("http://localhost/api/likes", {
-                headers: { Authorization: `Bearer ${token}` },
+                        console.log("取得データ:", data);
+                        likes.value = data;
+
+                        isProcessing.value = {};
+                        data.forEach((like) => {
+                            if (!like.post_id) {
+                                console.error("post_id が存在しません", like);
+                            }
+                            isProcessing.value[like.post_id] = false;
+                        });
+
+                        console.log("isProcessing (初期化後):", isProcessing.value);
+                        resolve(data);
+                    } catch (error) {
+                        console.error("いいね一覧の取得に失敗しました:", error);
+                        reject(error);
+                    }
+                });
             });
-
-            console.log("取得データ:", data);
-            likes.value = data;
-
-            data.forEach((like) => {
-                if (!like.post_id) {
-                    console.error("post_id が存在しません", like);
-                }
-                isProcessing.value[like.post_id] = false;
-            });
-
-            console.log("isProcessing (初期化後):", isProcessing.value);
         } catch (error) {
-            console.error("いいね一覧の取得に失敗しました:", error);
+            console.error("いいねデータの初期化に失敗:", error);
         }
     };
 

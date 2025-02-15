@@ -17,16 +17,15 @@ export const usePostStore = defineStore('posts', () => {
 
 
     const initializePost = async () => {
+        const likeStore = useLikeStore();
         try {
             const auth = getAuth();
             const currentUser = auth.currentUser;
 
-            const likeStore = useLikeStore();
             const { data } = await axios.get('http://localhost/api/posts', {
                 headers: currentUser ? { Authorization: `Bearer ${await currentUser.getIdToken()}` } : {},
             });
 
-            // 投稿データにいいね情報を付加
             posts.value = data.map((post) => {
                 const isLiked = currentUser ? likeStore.likes.some((like) => like.post_id === post.id) : false;
 
@@ -47,15 +46,25 @@ export const usePostStore = defineStore('posts', () => {
 
 
     const fetchPost = async (postId) => {
+        const userStore = useUserStore();
+        const likeStore = useLikeStore();
         try {
-            const userStore = useUserStore();
-            const likeStore = useLikeStore();
+            let token = "";
+            if (userStore.isAuthenticated && userStore.user) {
+                if (typeof userStore.user.getIdToken === "function") {
+                    token = await userStore.user.getIdToken();
+                } else {
+                    console.warn("userStore.user に getIdToken() がありません", userStore.user);
+                }
+            }
+
+            console.time("🔥 投稿データ取得");
 
             const { data } = await axios.get(`http://localhost/api/posts/${postId}`, {
-                headers: userStore.isAuthenticated && userStore.user
-                    ? { Authorization: `Bearer ${await userStore.user.getIdToken()}` }
-                    : {},
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
+
+            console.timeEnd("🔥 投稿データ取得");
 
             const isLiked = userStore.isAuthenticated && userStore.user
                 ? likeStore.likes.some((like) => like.post_id === data.id)
@@ -68,8 +77,9 @@ export const usePostStore = defineStore('posts', () => {
                 userName: data.user_name,
                 comments: data.comments || []
             };
+
         } catch (error) {
-            console.error('投稿データの取得に失敗しました', error);
+            console.error("投稿データの取得に失敗しました", error);
         }
     };
 

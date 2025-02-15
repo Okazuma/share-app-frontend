@@ -57,7 +57,6 @@ export const useCommentStore = defineStore('comment', () => {
                 ...response.data,
                 user_name: userName,
             });
-
             return response.data;
         } catch (error) {
             console.error('コメントの作成に失敗しました:', error);
@@ -119,9 +118,8 @@ export const useCommentStore = defineStore('comment', () => {
             const response = await axios.get(`http://localhost/api/comments/post/${postId}`);
             comments.value = response.data.map(comment => ({
                 ...comment,
-                userName: comment.user_name, // ここを追加！
+                userName: comment.user_name,
             }));
-
         } catch (error) {
             console.error("コメントの取得に失敗しました:", error);
         }
