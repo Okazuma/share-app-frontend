@@ -1,85 +1,139 @@
-# Nuxt Minimal Starter
+## アプリケーション名
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+    share-app フロントエンド (Twitter風投稿アプリのフロントエンド)
 
-## Setup
+<img width="650" src="https://github.com/user-attachments/assets/d1b63a9d-a6e4-409c-8b20-b1a47c6892fc">
 
-Make sure to install dependencies:
+## 概要説明
 
-```bash
-# npm
-npm install
+    - テキストベースで投稿の共有ができる掲示板アプリケーション
 
-# pnpm
-pnpm install
+    - コメントやいいね機能で投稿に対してのアクションができる
 
-# yarn
-yarn install
+## 作成目的
 
-# bun
-bun install
-```
+    - グループ間での目標や取り決めを書き込んでおくことでメッセージアプリで都度確認しなくてもいつでも確認できるようにするため。
 
-## Development Server
+    - 短い文章を投稿して共有するtwitter(X)のようなアプリケーションの作ってみて今後のアプリケーションの作成に生かす学習のため。
 
-Start the development server on `http://localhost:3000`:
+### フロントエンドの役割
 
-```bash
-# npm
-npm run dev
+    - バックエンドAPIとの連携
+      share-app のフロントエンドとして、バックエンドAPIにリクエストを送信してユーザーにUI,UXを提供する。
 
-# pnpm
-pnpm dev
+    - UI / UX の提供
+      ユーザーが直感的に操作できる シンプルなデザイン の実装
+      レスポンシブ対応（スマホ・PC どちらでも快適に利用可能）
 
-# yarn
-yarn dev
+    - APIとの通信
+      投稿の取得・作成・削除・編集 のリクエストをバックエンドAPIに送信
+      いいね機能の管理（ユーザーのリアクションを送信し、リアルタイムで更新）
+      認証済みユーザーのみが投稿・いいねできるよう制御
 
-# bun
-bun run dev
-```
+    - 状態管理（アプリのデータ管理）
+      Pinia を使用し、ユーザー情報・投稿データ・いいね情報を管理
+      キャッシュを活用して無駄なAPIリクエストを削減
+      リアルタイムでデータを更新し、スムーズな操作性を実現
 
-## Production
+    - エラーハンドリング & セキュリティ
+      API通信の エラーハンドリング（ネットワークエラー・認証エラーなどを適切に処理）
+      未ログインユーザーの制限（投稿やいいね機能はログイン済みのユーザーのみ利用可能）
+      入力バリデーションの実装（不正な投稿データが送られないようにチェック）
 
-Build the application for production:
+## アプリケーションURL
 
-```bash
-# npm
-npm run build
+##### ローカル環境
 
-# pnpm
-pnpm build
+http://localhost/3000/
 
-# yarn
-yarn build
+## 機能一覧
 
-# bun
-bun run build
-```
+    - ユーザー管理機能 (firebase Authentication)
+        ユーザーの新規登録・ログイン・ログアウト
+        認証済みユーザーのみ投稿・コメント・いいねができるように制御
 
-Locally preview production build:
+    - 投稿機能
+        投稿の作成・編集・削除
+        投稿の一覧表示
+        投稿の詳細表示
 
-```bash
-# npm
-npm run preview
+    - いいね機能
+        投稿に対するいいねの追加・解除
+        いいねのカウント表示
 
-# pnpm
-pnpm preview
+    - コメント機能
+        コメントの作成・削除
+        コメントの一覧表示
 
-# yarn
-yarn preview
+## 詳細内容
 
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-# share-app-frontend
-
-
+    - ユーザー管理機能 (firebase Authentication)
+      テスト用ユーザー(ログイン用)
+         ユーザー名:test1 / email: test1@example.com / password: 11111111
+         ユーザー名:test2 / email: test2@example.com / password: 22222222
+      新規登録時は名前・メールアドレス・パスワードを入力
+      ログイン時はメールアドレス・パスワードを入力
+      ログイン状態はPiniaに保存してリロード後も状態維持
 
 
+    - 投稿機能
+      投稿は最大は255文字まで可能
+      投稿作成・編集・削除時はリアルタイムで反映
+      投稿作成・編集・削除時は確認ダイアログを表示
+      自分の投稿のみ投稿の編集・削除が可能
 
- 1 掲示板のような使い方で特定のメンバーで情報やコメントの共有をできるように
-    (グループでのイベントや取り組みに対する目的や方針などを掲示しておくような使い方)
+    - いいね機能
+      ログインしてればいいねの追加・解除が可能
+      未ログインであればいいねのカウントのみ確認可能
+      いいねはリアルタイムで反映
 
-    pinia
+    - コメント機能
+      コメントは最大は255文字まで可能
+      投稿作成・編集・削除時はリアルタイムで UI に反映
+      コメント作成・削除時は確認ダイアログを表示
+      自分の投稿のみコメントの削除が可能
+
+    - SHAREアイコンをクリックするとHOME画面へ遷移する
+    - 閲覧だけであれば認証なしで誰でも可能
+
+## 使用技術
+
+    Docker 27.3.1
+    php 8.3.13
+    Laravel 8.83.29
+    Composer 2.8.4
+    nginx 1.21.1
+    Mysql 8.0.37
+    phpMyAdmin 5.2.1
+
+## 環境構築 & 開発サーバー起動手順
+
+    1 リポジトリをクローン
+      git clone https://github.com/Okazuma/share-app-frontend.git
+      cd share-app-frontend
+
+    2 依存パッケージのインストール
+      npm install
+
+    3 .env ファイルの作成
+      cp .env.example .env
+       .env の内容:  VITE_API_BASE_URL=API_URL=https://api.example.com
+
+    4 開発サーバーの起動
+      npm run dev
+
+    ※ 開発サーバーが起動しない場合
+      .env の VITE_API_BASE_URL を正しく設定してください。
+      Laravel バックエンドが http://localhost:8000 で起動していることを確認してください
+
+    ※ npm install でエラーが発生する場合は以下のコマンドでキャッシュをクリアして再試行してください
+      rm -rf node_modules package-lock.json
+      npm install
+
+    ※ ポート 3000 がすでに使用されている場合
+      他のアプリが 3000 番ポートを使用していないか確認してください。
+      3001 で起動する場合:  npm run dev -- --port 3001
+
+
+
+
