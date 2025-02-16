@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuth, onAuthStateChanged, updateProfile } from 'firebase/auth';
-import { getUserFromDB, saveUserToDB } from "~/db/db";
+import { getUserFromDB, saveUserToDB, deleteUserFromDB } from "~/db/db";
 
 
 export const useUserStore = defineStore("user", () => {
@@ -79,6 +79,7 @@ export const useUserStore = defineStore("user", () => {
             const auth = getAuth();
             await signOut(auth);
             clearUser();
+            await deleteUserFromDB();
         } catch (error) {
             console.error('Logout Error:', error);
             throw error;

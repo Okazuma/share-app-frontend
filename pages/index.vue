@@ -30,22 +30,22 @@ onBeforeMount(async () => {
     console.timeEnd("⭕️ ユーザー情報取得");
     console.log("現在のユーザー情報:", userStore.user);
 
-    let likeInit = Promise.resolve();
-    let commentInit = Promise.resolve();
+    console.time("⭕️ コメントデータ取得");
+    const commentInit = commentStore.initializeComments();
+    await commentInit;
+    console.timeEnd("⭕️ コメントデータ取得");
 
+    let likeInit = Promise.resolve();
     if (userStore.isAuthenticated && userStore.user) {
-      console.time("⭕️ いいね & コメントデータ取得");
-      [likeInit, commentInit] = await Promise.all([
-        likeStore.initializeLikes(),
-        commentStore.initializeComments(),
-      ]);
-      console.timeEnd("⭕️ いいね & コメントデータ取得");
+      console.time("⭕️ いいねデータ取得");
+      likeInit = likeStore.initializeLikes();
+      await likeInit;
+      console.timeEnd("⭕️ いいねデータ取得");
     }
 
-    // 投稿データの取得
     console.time("⭕️ 投稿データ取得");
     const postInit = postStore.initializePost();
-    await postInit; // 投稿データ取得を待機
+    await postInit;
     console.timeEnd("⭕️ 投稿データ取得");
 
     console.timeEnd("⭕️ 全体のデータ取得");

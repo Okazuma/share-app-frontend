@@ -1,6 +1,6 @@
 <template>
     <div class="user-menu items-center p-4 bg-indigo-950 text-white w-full md:w-80 h-auto md:h-screen ">
-        <NuxtLink to="/"><img src="/images/logo.png" class="h-6"></NuxtLink>
+        <a href="/"><img src="/images/logo.png" class="h-8"></a>
 
         <div class="my-4">
             <p v-if="user !== null"> {{ user?.displayName }} さん こんにちは！</p>
