@@ -80,8 +80,8 @@
 
 - ユーザー管理機能 (firebase Authentication)
    テスト用ユーザー(ログイン用)
-      ユーザー名:test1 / email: test1@example.com / password: 11111111
-      ユーザー名:test2 / email: test2@example.com / password: 22222222
+      ユーザー名:test1 / email: `test1@example.com` / password: 11111111
+      ユーザー名:test2 / email: `test2@example.com` / password: 22222222
    新規登録時は名前・メールアドレス・パスワードを入力
    ログイン時はメールアドレス・パスワードを入力
    ログイン状態はPiniaに保存してリロード後も状態維持
