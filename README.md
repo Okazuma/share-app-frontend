@@ -1,6 +1,6 @@
 # アプリケーション名
     share-app フロントエンド (Twitter風投稿アプリのフロントエンド)
-<img width="650" src="https://github.com/user-attachments/assets/d1b63a9d-a6e4-409c-8b20-b1a47c6892fc">
+<img width="650" src="https://github.com/user-attachments/assets/3e46cdf6-812d-45cc-8da4-8e6a609bff18">
 
 ## 概要説明
 - テキストベースで投稿の共有ができる掲示板アプリケーション
